@@ -7,3 +7,5 @@ edition = "2018"
 
 [dependencies]
 structopt = "0.3.23"
+prettytable-rs = "0.8.0"
+dirs = "4.0.0"

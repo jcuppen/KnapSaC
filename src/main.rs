@@ -1,113 +1,98 @@
 mod input;
+mod library;
 mod options;
-mod package;
 mod registry;
+
+#[macro_use]
+extern crate prettytable;
 
 use crate::input::boolean::BooleanInput;
 use crate::input::natural_number::NaturalNumberInput;
-
-use crate::package::{create_package, Package};
-
-use crate::registry::{create_registry, Registry};
-
+use crate::library::{Library, LibrarySet};
+use crate::registry::create_dummy_registry;
+use prettytable::{format, Table};
 use std::io;
 use std::io::Write;
-
 use std::process::exit;
 
-fn choose_candidate(packages: Vec<&Package>, is_retry: bool) -> Option<&Package> {
+fn choose_candidate(
+    module_id: String,
+    libraries: Vec<&Library>,
+    is_retry: bool,
+) -> Option<&Library> {
     if !is_retry {
-        println!(
-            "Multiple candidates found for package `{}`!",
-            packages.first().unwrap().id
-        );
+        println!("Multiple libraries found that provide `{}`", module_id);
     }
 
-    for (i, p) in packages.iter().enumerate() {
-        println!("  - [{}] {}", i + 1, p.location);
-    }
+    let mut table = Table::new();
+    table.set_format(*format::consts::FORMAT_CLEAN);
+
+    libraries.iter().enumerate().for_each(|(i, lib)| {
+        table.add_row(row![
+            format!("[{}]", i + 1),
+            lib.id,
+            format!("@ {}", lib.location)
+        ]);
+    });
+
+    table.printstd();
 
     print!("Please choose an option: ");
     io::stdout().flush().unwrap();
 
-    match input::natural_number::parse(1, packages.len()) {
-        NaturalNumberInput::Number(i) => Some(packages[i - 1]),
+    match input::natural_number::parse(1, libraries.len()) {
+        NaturalNumberInput::Number(i) => Some(libraries[i - 1]),
         NaturalNumberInput::TooLow(i) | NaturalNumberInput::TooHigh(i) => {
             println!("`{}` is not a valid option. Please choose again:", i);
-            choose_candidate(packages, true)
+            choose_candidate(module_id, libraries, true)
         }
         NaturalNumberInput::NaN(str) => {
             println!("`{}` is not a valid option. Please choose again:", str);
-            choose_candidate(packages, true)
+            choose_candidate(module_id, libraries, true)
         }
     }
 }
 
-fn clarify(reg: &Registry, pkg_id: String) -> Option<&Package> {
-    let res = reg.check_availability(pkg_id);
-
-    match res[..] {
-        [] => None,
-        [x] => Some(x),
-        _ => choose_candidate(res.clone(), false),
+fn request_conformation(library_set: &LibrarySet) -> BooleanInput {
+    if library_set.empty() {
+        println!("No modules were requested!");
+        exit(0)
     }
-}
 
-fn request_conformation(packages: &Vec<Package>) -> BooleanInput {
-    let formatted_packages = packages
-        .iter()
-        .map(|pkg| format!("  - {} @ {}", pkg.id, pkg.location))
-        .collect::<Vec<String>>()
-        .join("\n");
+    println!("The following libraries will be installed:");
 
-    println!("You have requested the following package(s) to be installed:");
-    println!("{}", formatted_packages);
+    let mut table = Table::new();
+    table.set_format(*format::consts::FORMAT_CLEAN);
+
+    library_set.libraries.iter().for_each(|lib| {
+        table.add_row(row![lib.id, format!("@ {}", lib.location)]);
+    });
+
+    table.printstd();
+
     print!("Is this correct? ([y]es/[n]o): ");
     io::stdout().flush().unwrap();
 
     input::boolean::parse()
 }
 
-fn process_response(packages: &Vec<Package>, response: BooleanInput) {
+fn process_response(library_set: &LibrarySet) {
+    let response = request_conformation(library_set);
+
     if !response.is_valid() {
         println!("Invalid {}", response.invalid_reason());
-        request_conformation(packages);
     }
 
     if response.is_affirmative() {
-        println!("The requested packages will be installed!")
+        library_set.install()
     } else {
         println!("No packages will be installed!")
     }
-    exit(0);
 }
 
 fn main() {
-    let dummy_registry: Registry = create_registry(vec![
-        create_package("A", "A-location"),
-        create_package("B", "B-location-1"),
-        create_package("B", "B-location-2"),
-        create_package("C", "C-location"),
-    ]);
-    let opt = options::get_options();
-    let package_identifiers = opt.packages;
+    let dummy_registry = create_dummy_registry();
+    let library_set = dummy_registry.resolve_ambiguities();
 
-    if package_identifiers.len() == 0 {
-        println!("No packages were requested!");
-        exit(0)
-    }
-
-    let mut requested_packages = vec![];
-
-    for pkg_id in package_identifiers {
-        let r = clarify(&dummy_registry, pkg_id);
-        match r {
-            None => {}
-            Some(pkg) => requested_packages.push(pkg.clone()),
-        }
-    }
-
-    let answer = request_conformation(&requested_packages);
-
-    process_response(&requested_packages, answer);
+    process_response(&library_set);
 }
