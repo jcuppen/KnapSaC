@@ -1,11 +1,10 @@
 use crate::options;
-use std::collections::HashSet;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::{fs, io};
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Library {
     pub(crate) id: String,
     pub(crate) location: String,
@@ -14,7 +13,7 @@ pub(crate) struct Library {
 
 #[derive(Clone)]
 pub(crate) struct LibrarySet {
-    pub(crate) libraries: HashSet<Library>,
+    pub(crate) libraries: Vec<Library>,
 }
 
 pub(crate) fn create_library(id: &str, location: &str, modules: Vec<&str>) -> Library {
@@ -73,6 +72,9 @@ impl Library {
 impl LibrarySet {
     pub(crate) fn empty(&self) -> bool {
         return self.libraries.len() == 0;
+    }
+    pub(crate) fn add_library(&mut self, new_library: Library) {
+        self.libraries.push(new_library);
     }
     pub(crate) fn install(&self) {
         let location = match options::get_options().location {

@@ -9,7 +9,7 @@ extern crate prettytable;
 use crate::input::boolean::BooleanInput;
 use crate::input::natural_number::NaturalNumberInput;
 use crate::library::{Library, LibrarySet};
-use crate::registry::create_dummy_registry;
+use crate::registry::{create_dummy_registry, Registry};
 use prettytable::{format, Table};
 use std::io;
 use std::io::Write;
@@ -53,7 +53,7 @@ fn choose_candidate(
     }
 }
 
-fn request_conformation(library_set: &LibrarySet) -> BooleanInput {
+fn request_conformation_install(library_set: &LibrarySet) -> BooleanInput {
     if library_set.empty() {
         println!("No modules were requested!");
         exit(0)
@@ -76,8 +76,15 @@ fn request_conformation(library_set: &LibrarySet) -> BooleanInput {
     input::boolean::parse()
 }
 
-fn process_response(library_set: &LibrarySet) {
-    let response = request_conformation(library_set);
+fn request_conformation_retry() -> BooleanInput {
+    print!("Do you want to try a different set of libraries? ([y]es/[n]o): ");
+    io::stdout().flush().unwrap();
+
+    input::boolean::parse()
+}
+
+fn process_response_installation(library_set: &LibrarySet) {
+    let response = request_conformation_install(library_set);
 
     if !response.is_valid() {
         println!("Invalid {}", response.invalid_reason());
@@ -90,9 +97,28 @@ fn process_response(library_set: &LibrarySet) {
     }
 }
 
+fn request_retry(registry: &Registry, conflicting_module_id: &String) {
+    println!(
+        "With the requested set of libraries it is impossible to resolve `{}`",
+        conflicting_module_id
+    );
+
+    let response = request_conformation_retry();
+
+    if !response.is_valid() {
+        println!("Invalid {}", response.invalid_reason());
+    }
+
+    if response.is_affirmative() {
+        registry.choose_libraries();
+    } else {
+        println!("No packages will be installed!")
+    }
+}
+
 fn main() {
     let dummy_registry = create_dummy_registry();
-    let library_set = dummy_registry.resolve_ambiguities();
+    let library_set = dummy_registry.choose_libraries();
 
-    process_response(&library_set);
+    process_response_installation(&library_set);
 }
