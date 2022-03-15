@@ -6,19 +6,10 @@ mod registry;
 // #[macro_use]
 // extern crate prettytable;
 
-use crate::registry::load_registry;
-use std::path::PathBuf;
-// use crate::input::boolean::BooleanInput;
-// use crate::input::natural_number::NaturalNumberInput;
-// use crate::module::Module;
-// use crate::module::ModuleSet;
-// use crate::registry::create_dummy_registry;
-// use crate::registry::Registry;
-// use prettytable::{format, Table};
-// use std::io;
-// use std::io::Write;
-// use std::process::exit;
-//
+use crate::registry::{create_dummy_registry, load_registry, save_registry, Registry};
+
+use std::process::exit;
+
 // fn choose_candidate(
 //     module_id: String,
 //     libraries: Vec<&Library>,
@@ -125,16 +116,19 @@ fn main() {
 
     // println!("{:?}", registry_file);
 
-    let registry = load_registry(options::get_options().registry_file);
+    // let registry = load_registry(options::get_options().registry_file);
 
-    // let dummy_registry = create_dummy_registry();
-    //
-    // if options::get_options().dump_registry {
-    //     dummy_registry.dump();
-    //     exit(0);
-    // }
-    //
-    // println!("No options passed!")
+    let registry = create_dummy_registry();
+
+    if options::get_options().dump_registry {
+        println!("{}", registry.expect("Failed to parse 'registry.json'"));
+    }
+
+    registry
+        .as_ref()
+        .unwrap()
+        .save(&options::get_options().registry_file);
+    // save_registry(&registry.unwrap(), &options::get_options().registry_file);
 
     // let library_set = dummy_registry.choose_libraries();
 
