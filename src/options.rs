@@ -5,12 +5,20 @@ use structopt::StructOpt;
 /// I am a program and I work, just pass `-h`
 pub(crate) struct Opt {
     /// Specify the desired modules
-    #[structopt(short = "m", long)]
-    pub(crate) modules: Vec<String>,
+    // #[structopt(short, long)]
+    // pub(crate) modules: Vec<String>,
 
     /// Specify the target location
-    #[structopt(short = "l", long)]
-    pub(crate) location: Option<PathBuf>,
+    // #[structopt(short, long)]
+    // pub(crate) location: Option<PathBuf>,
+
+    /// Specify the desired registry file
+    #[structopt(short, long)]
+    pub(crate) registry_file: PathBuf,
+
+    /// Lists the local registry
+    #[structopt(short, long)]
+    pub(crate) dump_registry: bool,
 }
 
 pub(crate) fn get_options() -> Opt {
