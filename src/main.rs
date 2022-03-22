@@ -6,8 +6,9 @@ mod registry;
 // #[macro_use]
 // extern crate prettytable;
 
-use crate::registry::{create_dummy_registry, load_registry, save_registry, Registry};
+use crate::registry::load_registry;
 
+use git2::Repository;
 use std::process::exit;
 
 // fn choose_candidate(
@@ -112,25 +113,44 @@ use std::process::exit;
 // }
 
 fn main() {
-    // let registry_file_path = ;
+    let registry_path = options::get_options().registry_filepath;
+    let new_repo_path = options::get_options().add;
 
-    // println!("{:?}", registry_file);
+    let repo = match Repository::open(&new_repo_path) {
+        Ok(r) => r,
+        Err(_) => {
+            println!("Failed to parse '{}'", new_repo_path.display());
+            exit(1)
+        }
+    };
 
-    // let registry = load_registry(options::get_options().registry_file);
-
-    let registry = create_dummy_registry();
-
-    if options::get_options().dump_registry {
-        println!("{}", registry.expect("Failed to parse 'registry.json'"));
+    // println!("{:?}", repo.remotes().unwrap().);
+    // repo.remotes()
+    //     .iter()
+    //     .for_each(|s| s.iter().for_each(|a| println!("{}", a.unwrap())));
+    for stringArray in repo.remotes() {
+        for opt_str in stringArray.iter() {
+            match opt_str {
+                None => {}
+                Some(s) => {
+                    let remote = repo.find_remote(s).unwrap();
+                    println!("remote: {} url: {}", s, remote.url().unwrap())
+                }
+            }
+        }
     }
 
-    registry
-        .as_ref()
-        .unwrap()
-        .save(&options::get_options().registry_file);
-    // save_registry(&registry.unwrap(), &options::get_options().registry_file);
+    let registry = match load_registry(&registry_path) {
+        Ok(r) => r,
+        Err(_) => {
+            println!("Failed to parse '{}'", registry_path.display());
+            exit(1)
+        }
+    };
 
-    // let library_set = dummy_registry.choose_libraries();
+    if options::get_options().dump_registry {
+        registry.dump();
+    }
 
-    // process_response_installation(&library_set);
+    registry.save(&registry_path);
 }
