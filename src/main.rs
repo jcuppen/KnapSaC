@@ -1,3 +1,5 @@
+extern crate core;
+
 mod input;
 mod module;
 mod options;
@@ -6,10 +8,9 @@ mod registry;
 // #[macro_use]
 // extern crate prettytable;
 
+use crate::module::{create_module, RegistrationStatus};
+use crate::options::Command;
 use crate::registry::load_registry;
-
-use git2::Repository;
-use std::process::exit;
 
 // fn choose_candidate(
 //     module_id: String,
@@ -113,44 +114,19 @@ use std::process::exit;
 // }
 
 fn main() {
-    let registry_path = options::get_options().registry_filepath;
-    let new_repo_path = options::get_options().add;
+    let registry_path = options::get_options().registry_path;
 
-    let repo = match Repository::open(&new_repo_path) {
-        Ok(r) => r,
-        Err(_) => {
-            println!("Failed to parse '{}'", new_repo_path.display());
-            exit(1)
-        }
-    };
+    // Load registry
+    let mut registry = load_registry(&registry_path).expect(&*format!(
+        "Failed to parse registry @ {}",
+        registry_path.display()
+    ));
 
-    // println!("{:?}", repo.remotes().unwrap().);
-    // repo.remotes()
-    //     .iter()
-    //     .for_each(|s| s.iter().for_each(|a| println!("{}", a.unwrap())));
-    for stringArray in repo.remotes() {
-        for opt_str in stringArray.iter() {
-            match opt_str {
-                None => {}
-                Some(s) => {
-                    let remote = repo.find_remote(s).unwrap();
-                    println!("remote: {} url: {}", s, remote.url().unwrap())
-                }
-            }
-        }
+    match options::get_options().command {
+        Command::Add { path } => registry.add(path),
+        Command::Remove { path } => registry.remove(path),
+        Command::Dump => registry.dump(),
     }
 
-    let registry = match load_registry(&registry_path) {
-        Ok(r) => r,
-        Err(_) => {
-            println!("Failed to parse '{}'", registry_path.display());
-            exit(1)
-        }
-    };
-
-    if options::get_options().dump_registry {
-        registry.dump();
-    }
-
-    registry.save(&registry_path);
+    registry.save();
 }

@@ -1,12 +1,12 @@
-use crate::module::{create_known_module, create_registered_module, Module};
-use crate::options;
+use crate::module::Module;
+use crate::{create_module, options};
 use fmt::Display;
+use git2::Repository;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Result;
 use std::fmt::Formatter;
-use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::fs::write;
 use std::path::{Path, PathBuf};
 use std::{fmt, fs};
 
@@ -19,28 +19,21 @@ pub(crate) struct Registry {
 }
 
 fn default_registry_path() -> PathBuf {
-    options::get_options().registry_filepath
+    options::get_options().registry_path
 }
 
 pub(crate) fn load_registry(registry_path: &Path) -> Result<Registry> {
-    let data = match fs::read_to_string(registry_path) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("Unable to read file '{}'", registry_path.display());
-            println!("creating an empty registry instead.");
-            return create_empty_registry(registry_path);
-        }
-    };
-    serde_json::from_str(&*data)
+    if let Ok(data) = fs::read_to_string(registry_path) {
+        return serde_json::from_str(&*data);
+    }
+    println!("Unable to read file '{}'", registry_path.display());
+    println!("creating an empty registry instead.");
+    create_empty_registry(registry_path)
 }
 
 impl Display for Registry {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let modules = self
-            .modules
-            .iter()
-            .map(|m| format!("{}", m))
-            .collect::<String>();
+        let modules: String = self.modules.iter().map(|m| format!("{}", m)).collect();
         write!(f, "{}", modules)
     }
 }
@@ -53,29 +46,38 @@ pub(crate) fn create_empty_registry(registry_path: &Path) -> Result<Registry> {
 }
 
 impl Registry {
-    pub(crate) fn save(&self, registry_path: &Path) {
-        let file = match File::open(registry_path) {
-            Ok(f) => f,
-            Err(_) => match File::create(registry_path) {
-                Ok(f) => f,
-                Err(e) => panic!("Could not create file {}: {}", registry_path.display(), e),
-            },
-        };
+    pub(crate) fn save(&self) {
+        let contents = serde_json::to_string(self).unwrap();
+        write(self.path.as_path(), contents).unwrap()
+    }
 
-        let mut buf_writer = BufWriter::new(file);
-        let contents = serde_json::to_string(self);
-        match buf_writer.write_all(contents.unwrap().as_bytes()) {
-            Ok(_) => {}
-            Err(e) => panic!(
-                "Could not write registry to file {}: {}",
-                registry_path.display(),
-                e
-            ),
+    pub(crate) fn add(&mut self, entry_path: PathBuf) {
+        if self.modules.iter().any(|m| m.path == entry_path) {
+            println!("WARNING: entry already in registry");
+            println!("Entry will not be added to the registry");
+            return;
         }
+
+        let repository = Repository::discover(&entry_path).expect(&*format!(
+            "Failed to discover repository @ {}",
+            entry_path.display()
+        ));
+
+        self.modules.push(create_module(entry_path, repository));
+    }
+
+    pub(crate) fn remove(&mut self, entry_path: PathBuf) {
+        let new_modules: Vec<Module> = self
+            .modules
+            .clone()
+            .into_iter()
+            .filter(|m| m.path != entry_path)
+            .collect();
+        self.modules = new_modules;
     }
 
     pub(crate) fn dump(&self) {
-        println!("Registry used: '{}", self.path.display());
+        println!("Registry used: '{}'", self.path.display());
         println!("Total number of entries: {}", self.modules.len());
         println!("{}", self);
     }

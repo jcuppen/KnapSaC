@@ -1,53 +1,77 @@
-use crate::module::RegistrationStatus::{Known, Registered};
+use crate::RegistrationStatus::{Known, Registered};
 use fmt::Display;
+use git2::string_array::StringArray;
+use git2::Repository;
 use serde::Deserialize;
 use serde::Serialize;
 use std::fmt;
 use std::fmt::Formatter;
 use std::path::PathBuf;
-use url::Url;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub enum RegistrationStatus {
     Registered,
     Known,
 }
 
-#[derive(Deserialize, Serialize)]
+/*
+ Questions:
+ - When is something considered Registered?
+ - Does a packages always have to belong to a git-repository?
+    - If not, where should 'local_location' point to in the case there is no git repository.
+ - Is the dependency file mandatory?
+*/
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Module {
-    registration_status: RegistrationStatus,
-    path: PathBuf,
-    local_location: PathBuf,
-    remote_location: Option<Url>,
+    registration_status: RegistrationStatus, //TODO: When is something registered
+    pub(crate) path: PathBuf,
+    local_location: PathBuf, //TODO: Where should this point towards?
+    remote_location: Option<String>,
     dependency_file: PathBuf,
 }
 
-pub(crate) fn create_registered_module(
-    path: &str,
-    package_location: &str,
-    repository_location: &str,
-    dependency_file: &str,
-) -> Module {
-    Module {
-        registration_status: Registered,
-        path: PathBuf::from(path),
-        local_location: PathBuf::from(package_location),
-        remote_location: Some(Url::parse(repository_location).unwrap()),
-        dependency_file: PathBuf::from(dependency_file),
+pub(crate) fn create_module(new_entry_path: PathBuf, repository: Repository) -> Module {
+    let string_array = repository
+        .remotes()
+        .expect(&*format!("No remotes for: {}", repository.path().display()).as_str());
+
+    if string_array.is_empty() {
+        println!("No remotes!");
+        create_known_module(new_entry_path, repository)
+    } else {
+        if string_array.len() == 1 {
+            println!("Exactly 1 remote!");
+        } else {
+            println!("WARNING: Multiple remotes found using first for now!");
+        }
+        create_registered_module(new_entry_path, repository, string_array)
     }
 }
 
-pub(crate) fn create_known_module(
-    path: &str,
-    package_location: &str,
-    dependency_file: &str,
+fn create_registered_module(
+    new_entry_path: PathBuf,
+    repository: Repository,
+    remotes: StringArray,
 ) -> Module {
+    let remote_name_str = remotes.get(0).unwrap();
+    let remote = repository.find_remote(remote_name_str).unwrap();
+
+    Module {
+        registration_status: Registered,
+        path: new_entry_path.clone(),
+        local_location: repository.path().to_path_buf(),
+        remote_location: Some(String::from(remote.url().unwrap())), //FIX
+        dependency_file: new_entry_path,                            //FIX
+    }
+}
+
+fn create_known_module(new_entry_path: PathBuf, repository: Repository) -> Module {
     Module {
         registration_status: Known,
-        path: PathBuf::from(path),
-        local_location: PathBuf::from(package_location),
+        path: new_entry_path.clone(),
+        local_location: repository.path().to_path_buf(),
         remote_location: None,
-        dependency_file: PathBuf::from(dependency_file),
+        dependency_file: new_entry_path, //FIX
     }
 }
 
@@ -71,120 +95,5 @@ impl Display for Module {
             remote_location,
             self.dependency_file.display()
         )
-        // write!(f, "{}", self.path.to_str().unwrap());
-        // write!(f, "\t-> {}", self.local_location.to_str().unwrap());
-
-        // write!(f, "{}", i);
-        // write!(f, "\t-> {}", self.remote_location.unwrap().as_str());
-        // write!(f, "\t-> {}", self.dependency_file.to_str().unwrap())
     }
 }
-
-// struct UrlVisitor;
-
-// impl<'de> Visitor<'de> for UrlVisitor {
-//
-// }
-//
-// impl Deserialize for Url {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, serde::de::Error> where D: Deserializer<'de> {
-//         deserializer.deserialize_string()
-//     }
-// }
-
-// impl Module {
-//     pub(crate) fn dump(&self) {
-//         match self {
-//             Module::Registered {
-//                 path,
-//                 locations,
-//                 dependency_file,
-//             } => {
-//                 println!("{}", path.to_str().unwrap());
-//                 println!("\t-> {}", locations.local_location.to_str().unwrap());
-//                 println!("\t-> {}", locations.remote_location.as_str());
-//                 println!("\t-> {}", dependency_file.to_str().unwrap());
-//             }
-//             Module::Known {
-//                 path,
-//                 dependency_file,
-//             } => {
-//                 println!("{}", path.to_str().unwrap());
-//                 println!("\t-> {}", dependency_file.to_str().unwrap());
-//             }
-//         }
-//     }
-// }
-
-//     pub(crate) fn download(&self, target_parent: &PathBuf) {
-//         let mut target_directory = target_parent.clone();
-//         target_directory.push(&*self.id);
-//
-//         println!(
-//             "Downloading `{}` to `{}`",
-//             self.id,
-//             target_directory.display()
-//         );
-//
-//         Command::new("git")
-//             .arg("clone")
-//             .arg(&*self.location)
-//             .arg(&target_directory)
-//             .arg("--recurse-submodules")
-//             .output()
-//             .expect("failed to execute process");
-//     }
-//
-//     pub(crate) fn build(&self, target_parent: &PathBuf) {
-//         let mut build_directory = target_parent.clone();
-//         build_directory.push(&*self.id);
-//         build_directory.push("build");
-//
-//         println!("Creating build directory: `{}`", build_directory.display());
-//
-//         fs::create_dir(&build_directory).unwrap();
-//
-//         Command::new("cmake")
-//             .current_dir(&build_directory)
-//             .arg("..")
-//             .output()
-//             .expect("failed to execute process");
-//         let output = Command::new("make")
-//             .current_dir(&build_directory)
-//             .arg("-j4")
-//             .output()
-//             .expect("failed to execute process");
-//
-//         io::stdout().write_all(&output.stdout).unwrap();
-//         io::stderr().write_all(&output.stderr).unwrap();
-//     }
-// }
-
-// impl ModuleSet {
-//     pub(crate) fn empty(&self) -> bool {
-//         return self.libraries.len() == 0;
-//     }
-//     pub(crate) fn add_library(&mut self, new_library: Library) {
-//         self.libraries.push(new_library);
-//     }
-//     pub(crate) fn install(&self) {
-//         let location = match options::get_options().location {
-//             None => {
-//                 let mut p = dirs::home_dir().unwrap();
-//                 p.push("knapSaC_libraries");
-//                 p
-//             }
-//             Some(loc) => loc.canonicalize().unwrap(),
-//         };
-//
-//         println!(
-//             "The requested packages will be downloaded to: `{}`!",
-//             location.display()
-//         );
-//
-//         for lib in self.libraries.clone() {
-//             lib.download(&location);
-//             lib.build(&location);
-//         }
-//     }
-// }
