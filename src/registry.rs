@@ -1,6 +1,7 @@
 use crate::options;
 use crate::package::{create_package, Package};
 use crate::util::{discover_git_repository, infer_working_directory};
+
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Result;
@@ -37,16 +38,21 @@ pub(crate) fn create_empty_registry(registry_path: &Path) -> Result<Registry> {
 }
 
 impl Registry {
-    fn find_entry(&self, entry_path: &Path) -> &Package {
+    pub(crate) fn find_entry_by_local_location(&self, entry_path: &Path) -> Option<&Package> {
         let inferred_working_directory = infer_working_directory(entry_path);
         return self
             .packages
             .iter()
-            .find(|p| p.local_location == inferred_working_directory)
-            .expect(&*format!(
-                "No package found @ {}",
-                inferred_working_directory.display()
-            ));
+            .find(|p| p.local_location == inferred_working_directory);
+    }
+
+    pub(crate) fn find_entry_by_remote_location(&self, url: &str) -> Option<&Package> {
+        return self.packages.iter().find(|p| {
+            if let Some(remote) = &p.remote_location {
+                return remote == url;
+            }
+            false
+        });
     }
 
     pub(crate) fn save(&self) {
@@ -56,12 +62,7 @@ impl Registry {
 
     pub(crate) fn add(&mut self, entry_path: &Path) {
         let local_repository_root = infer_working_directory(entry_path);
-
-        if self
-            .packages
-            .iter()
-            .any(|m| m.local_location == local_repository_root)
-        {
+        if self.find_entry_by_local_location(entry_path).is_some() {
             println!("WARNING: entry already in registry");
             println!("Entry will not be added to the registry");
             return;
@@ -73,14 +74,20 @@ impl Registry {
             .push(create_package(local_repository_root, repository));
     }
 
-    pub(crate) fn add_dependency(&self, entry_path: &Path, value: i32) {
-        let found_package = self.find_entry(entry_path);
-        found_package.add_dependency(value);
+    pub(crate) fn add_dependency(&self, entry_path: &Path, value: String) {
+        if let Some(found_package) = self.find_entry_by_local_location(entry_path) {
+            found_package.add_dependency(value);
+            return;
+        }
+        panic!("No package found @ {}", entry_path.display());
     }
 
-    pub(crate) fn remove_dependency(&self, entry_path: &Path, value: i32) {
-        let found_package = self.find_entry(entry_path);
-        found_package.remove_dependency(value);
+    pub(crate) fn remove_dependency(&self, entry_path: &Path, value: String) {
+        if let Some(found_package) = self.find_entry_by_local_location(entry_path) {
+            found_package.remove_dependency(value);
+            return;
+        }
+        panic!("No package found @ {}", entry_path.display());
     }
 
     pub(crate) fn remove(&mut self, entry_path: &Path) {
@@ -96,10 +103,12 @@ impl Registry {
 
     pub(crate) fn dump(&self, entry: Option<PathBuf>, list_dependencies: bool) {
         if let Some(e) = entry {
-            let found_package = self.find_entry(&e);
-            println!("Registry used: '{}'", self.path.display());
-            found_package.dump(list_dependencies);
-            return;
+            if let Some(found_package) = self.find_entry_by_local_location(&e) {
+                println!("Registry used: '{}'", self.path.display());
+                found_package.dump(list_dependencies);
+                return;
+            }
+            panic!("No package found @ {}", e.display());
         }
 
         println!("Registry used: '{}'", self.path.display());

@@ -27,7 +27,7 @@ pub enum RegistrationStatus {
 pub struct Package {
     registration_status: RegistrationStatus,
     pub(crate) local_location: PathBuf,
-    remote_location: Option<String>,
+    pub(crate) remote_location: Option<String>,
     manifest_location: PathBuf,
 }
 
@@ -91,8 +91,8 @@ fn create_known_package(local_repository_root: PathBuf, manifest_location: PathB
 }
 
 impl Package {
-    pub(crate) fn add_dependency(&self, value: i32) {
-        let new_dep = Dependency { test: value };
+    pub(crate) fn add_dependency(&self, value: String) {
+        let new_dep = Dependency { git_url: value };
         if let Ok(data) = fs::read_to_string(self.manifest_location.clone()) {
             let mut dependencies: Vec<Dependency> = serde_json::from_str(&*data).unwrap();
             dependencies.push(new_dep);
@@ -103,8 +103,8 @@ impl Package {
         }
     }
 
-    pub(crate) fn remove_dependency(&self, value: i32) {
-        let dep_to_remove = Dependency { test: value };
+    pub(crate) fn remove_dependency(&self, value: String) {
+        let dep_to_remove = Dependency { git_url: value };
         if let Ok(data) = fs::read_to_string(self.manifest_location.clone()) {
             let mut dependencies: Vec<Dependency> = serde_json::from_str(&*data).unwrap();
             if let Some(index) = dependencies.iter().position(|d| d == &dep_to_remove) {

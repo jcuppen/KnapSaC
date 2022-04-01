@@ -8,7 +8,7 @@ mod package;
 mod registry;
 mod util;
 
-use crate::options::Command;
+use crate::options::{Command, SearchVariant};
 use crate::registry::load_registry;
 
 fn main() {
@@ -35,5 +35,21 @@ fn main() {
             entry,
             list_dependencies,
         } => registry.dump(entry, list_dependencies),
+        Command::Contains(variant) => match variant {
+            SearchVariant::Local { path } => {
+                if registry.find_entry_by_local_location(&path).is_some() {
+                    println!("Found");
+                } else {
+                    println!("Not Found");
+                }
+            }
+            SearchVariant::Remote { git_url } => {
+                if registry.find_entry_by_remote_location(&git_url).is_some() {
+                    println!("Found")
+                } else {
+                    println!("Not Found")
+                }
+            }
+        },
     }
 }

@@ -24,6 +24,8 @@ pub(crate) enum Command {
         #[structopt(short = "d")]
         list_dependencies: bool,
     },
+    /// Check if local registry contains a certain entry
+    Contains(SearchVariant),
     /// Adds an entry
     Add {
         /// Path to new entry
@@ -32,14 +34,14 @@ pub(crate) enum Command {
     /// Adds a new dependency to the provided entry
     AddDependency {
         #[structopt(short = "v")]
-        value: i32,
+        value: String,
         /// Path to entry where the dependency should be added
         path: PathBuf,
     },
     /// Remove a dependency for the provided entry
     RemoveDependency {
         #[structopt(short = "v")]
-        value: i32,
+        value: String,
         /// Path to entry where the dependency should be removed
         path: PathBuf,
     },
@@ -48,6 +50,12 @@ pub(crate) enum Command {
         /// Path for entry that needs to be removed
         path: PathBuf,
     },
+}
+
+#[derive(StructOpt)]
+pub(crate) enum SearchVariant {
+    Local { path: PathBuf },
+    Remote { git_url: String },
 }
 
 pub(crate) fn get_options() -> Opt {
