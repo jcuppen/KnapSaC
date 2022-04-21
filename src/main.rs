@@ -23,13 +23,12 @@ fn main() {
     match options::get_options().command {
         Command::Add { path } => {
             registry.add(&path);
-            registry.save();
         }
-        Command::AddDependency { path, value } => registry.add_dependency(&path, value),
+        Command::AddDependency { 
+            path, value } => registry.add_dependency(&path, value),
         Command::RemoveDependency { path, value } => registry.remove_dependency(&path, value),
         Command::Remove { path } => {
             registry.remove(&path);
-            registry.save();
         }
         Command::Dump {
             entry,
@@ -52,4 +51,5 @@ fn main() {
             }
         },
     }
+    registry.save();
 }
