@@ -1,63 +1,65 @@
+use clap::Parser;
+use clap::Subcommand;
 use std::path::PathBuf;
-use structopt::StructOpt;
+use url::Url;
 
-#[derive(StructOpt)]
-/// I am a program and I work, just pass `-h`
-pub(crate) struct Opt {
-    #[structopt(subcommand)]
-    pub(crate) command: Command,
-
+#[derive(Parser)]
+pub(crate) struct Cli {
     /// Specify the desired registry file
-    #[structopt(short = "r", long)]
+    #[clap(short = 'R', long)]
+    #[clap(parse(from_os_str))]
+    #[clap(env = "KNAPSAC_REGISTRY_PATH")]
     pub(crate) registry_path: PathBuf,
+
+    #[clap(subcommand)]
+    pub(crate) command: Command,
 }
 
-#[derive(StructOpt)]
+#[derive(Subcommand)]
 pub(crate) enum Command {
-    /// Lists the local registry
-    Dump {
-        /// Path to specific entry to dump (omit to dump all)
-        #[structopt(short, long)]
-        entry: Option<PathBuf>,
-
-        /// Specify whether or not to list dependencies
-        #[structopt(short = "d")]
-        list_dependencies: bool,
-    },
-    /// Check if local registry contains a certain entry
-    Contains(SearchVariant),
-    /// Adds an entry
+    /// Adds a package to the registry
     Add {
-        /// Path to new entry
-        path: PathBuf,
+        /// Path to the package
+        #[clap(parse(from_os_str))]
+        package_location: PathBuf,
     },
-    /// Adds a new dependency to the provided entry
-    AddDependency {
-        #[structopt(short = "v")]
-        value: String,
-        /// Path to entry where the dependency should be added
-        path: PathBuf,
-    },
-    /// Remove a dependency for the provided entry
-    RemoveDependency {
-        #[structopt(short = "v")]
-        value: String,
-        /// Path to entry where the dependency should be removed
-        path: PathBuf,
-    },
-    /// Removes an entry
+    /// Removes a package from the registry
     Remove {
-        /// Path for entry that needs to be removed
-        path: PathBuf,
+        /// Path to the package
+        #[clap(parse(from_os_str))]
+        package_location: PathBuf,
     },
+    /// Creates an empty registry
+    Initialize,
+    /// Downloads the package and adds it to the registry
+    Download {
+        /// Git Url of remote location of package
+        package_location: Url,
+        /// Path where package must be downloaded to
+        #[clap(env = "KNAPSAC_PACKAGE_ROOT")]
+        #[clap(parse(from_os_str))]
+        target_location: PathBuf,
+    },
+    // /// Adds a new dependency to the provided entry
+    // AddDependency {
+    //     #[structopt(short = "v")]
+    //     value: String,
+    //     /// Path to entry where the dependency should be added
+    //     path: PathBuf,
+    // },
+    // /// Remove a dependency for the provided entry
+    // RemoveDependency {
+    //     #[structopt(short = "v")]
+    //     value: String,
+    //     /// Path to entry where the dependency should be removed
+    //     path: PathBuf,
+    // },
+    // /// Check if local registry contains a certain entry
+    // Contains(SearchVariant),
 }
 
-#[derive(StructOpt)]
-pub(crate) enum SearchVariant {
-    Local { path: PathBuf },
-    Remote { git_url: String },
-}
-
-pub(crate) fn get_options() -> Opt {
-    Opt::from_args()
-}
+// #[derive(StructOpt)]
+// pub(crate) enum SearchVariant {
+//     Local { path: PathBuf },
+//     Remote { git_url: String },
+// }

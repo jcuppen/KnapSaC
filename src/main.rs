@@ -1,55 +1,35 @@
 extern crate core;
 
-mod dependency;
-mod input;
-mod module;
 mod options;
-mod package;
-mod registry;
-mod util;
 
-use crate::options::{Command, SearchVariant};
-use crate::registry::load_registry;
+use crate::options::{Cli, Command};
+use clap::Parser;
+use knapsac_lib::{download, initialize_registry, load_registry};
+use std::path::PathBuf;
 
 fn main() {
-    let registry_path = options::get_options().registry_path;
+    let cli = Cli::parse();
 
-    // Load registry
-    let mut registry = load_registry(&registry_path).expect(&*format!(
-        "Failed to parse registry @ {}",
-        registry_path.display()
-    ));
+    let registry_path: PathBuf = cli.registry_path;
 
-    match options::get_options().command {
-        Command::Add { path } => {
-            registry.add(&path);
+    let mut registry = initialize_registry();
+
+    match cli.command {
+        Command::Add {package_location}=> {
+            registry = load_registry(&registry_path);
+            registry.add(&package_location);
         }
-        Command::AddDependency { 
-            path, value } => registry.add_dependency(&path, value),
-        Command::RemoveDependency { path, value } => registry.remove_dependency(&path, value),
-        Command::Remove { path } => {
-            registry.remove(&path);
+        Command::Remove {package_location} => {
+            registry = load_registry(&registry_path);
+            registry.remove(&package_location);
         }
-        Command::Dump {
-            entry,
-            list_dependencies,
-        } => registry.dump(entry, list_dependencies),
-        Command::Contains(variant) => match variant {
-            SearchVariant::Local { path } => {
-                if registry.find_entry_by_local_location(&path).is_some() {
-                    println!("Found");
-                } else {
-                    println!("Not Found");
-                }
-            }
-            SearchVariant::Remote { git_url } => {
-                if registry.find_entry_by_remote_location(&git_url).is_some() {
-                    println!("Found")
-                } else {
-                    println!("Not Found")
-                }
-            }
-        },
+        Command::Initialize => {}
+        Command::Download {package_location, target_location} => {
+            registry = load_registry(&registry_path);
+            download(&mut registry, package_location, &target_location);
+        }
+        // Command::AddDependency { path, value } => registry.add_dependency(&path, value),
+        // Command::RemoveDependency { path, value } => registry.remove_dependency(&path, value),
     }
-    registry.save();
+    registry.save(&registry_path);
 }
