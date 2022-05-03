@@ -5,38 +5,40 @@ use crate::options::{Cli, Command};
 mod options;
 
 use clap::Parser;
-use knapsac_lib::{download, initialize_registry, load_registry};
-use std::path::PathBuf;
+use knapsac_lib::registry::Registry;
 
 fn main() {
     let cli = Cli::parse();
 
-    let registry_path: PathBuf = cli.registry_path;
-
-    let mut registry = initialize_registry();
+    let registry_path = cli.registry_path;
 
     match cli.command {
         Command::Add {package_location}=> {
-            registry = load_registry(&registry_path);
+            let mut registry = Registry::load(&registry_path);
             registry.add(&package_location);
+            registry.save(&registry_path);
         }
         Command::Remove {package_location} => {
-            registry = load_registry(&registry_path);
+            let mut registry = Registry::load(&registry_path);
             registry.remove(&package_location);
+            registry.save(&registry_path);
         }
-        Command::Initialize => {}
+        Command::Initialize => {
+            let registry = Registry::initialize();
+            registry.save(&registry_path);
+        }
         Command::Download {package_location, target_location} => {
-            registry = load_registry(&registry_path);
-            download(&mut registry, package_location, &target_location);
+            let mut registry = Registry::load(&registry_path);
+            registry.download(package_location, &target_location);
+            registry.save(&registry_path);
         }
         Command::AddDependency { package_location, value } => {
-            registry = load_registry(&registry_path);
+            let registry = Registry::load(&registry_path);
             registry.add_dependency(&package_location, value)
         },
         Command::RemoveDependency { package_location, value } => {
-            registry = load_registry(&registry_path);
+            let registry = Registry::load(&registry_path);
             registry.remove_dependency(&package_location, value)
         },
     }
-    registry.save(&registry_path);
 }
