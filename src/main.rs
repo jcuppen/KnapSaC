@@ -1,8 +1,9 @@
 extern crate core;
 
+use crate::options::{Cli, Command};
+
 mod options;
 
-use crate::options::{Cli, Command};
 use clap::Parser;
 use knapsac_lib::{download, initialize_registry, load_registry};
 use std::path::PathBuf;
