@@ -1,8 +1,4 @@
-
-###########
-Main
-###########
-
+\n###########\nMain\n###########\n
 knapsac 
 
 USAGE:
@@ -33,7 +29,7 @@ OPTIONS:
             
             [Environment]
             
-            [env: KNAPSAC_REGISTRY_PATH=/Users/job/registry.json]
+            [env: KNAPSAC_REGISTRY_PATH=]
 
 SUBCOMMANDS:
     add
@@ -47,11 +43,7 @@ SUBCOMMANDS:
             Overwrites any file already present
     remove
             Removes a package from the registry
-
-###########
-Initialize
-###########
-
+\n###########\nInitialize\n###########\n
 knapsac-initialize 
 Creates an empty registry at the given <REGISTRY_PATH>
 Overwrites any file already present
@@ -61,28 +53,30 @@ USAGE:
 
 OPTIONS:
     -h, --help    Print help information
-
-###########
-Add
-###########
-
+\n###########\nAdd\n###########\n
 knapsac-add 
 Adds a package to the registry
 
-[Examples] It is assumed there is a git repository on disk located at '/home/my_user/package/'
+[Examples]
+It is assumed there is a git repository on disk located at '/home/my_user/package/'
 
-./knapsac -r /home/registry.json add /home/package/file.txt
+    ./knapsac -r /home/registry.json add /home/package/file.txt
 
 will result in the following entry being added to the registry:
 
-{ "registration_status": "<REGISTRATION_STATUS>", "local_location": "/home/package/",
-"remote_location": "<GIT_URL>" }
+    {
+        "registration_status": "<REGISTRATION_STATUS>",
+        "local_location": "/home/package/",
+        "remote_location": "<GIT_URL>"
+    }
 
-<REGISTRATION_STATUS> can be Registered: when the discovered git repository has a remote Known: when
-the discovered git repository has no remotes
+<REGISTRATION_STATUS> can be
+    Registered: when the discovered git repository has a remote
+    Known: when the discovered git repository has no remotes
 
-[Errors] An error is returned when: the given <REGISTRY_PATH> does not point to a valid registry
-file
+[Errors]
+An error is returned when:
+    the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
     knapsac --registry-path <REGISTRY_PATH> add <PACKAGE_LOCATION>
@@ -111,26 +105,28 @@ ARGS:
 OPTIONS:
     -h, --help
             Print help information
-
-###########
-Remove
-###########
-
+\n###########\nRemove\n###########\n
 knapsac-remove 
 Removes a package from the registry
 
-[Examples] ./knapsac -r /home/registry.json remove /home/package/file.txt
+[Examples]
+    ./knapsac -r /home/registry.json remove /home/package/file.txt
 
 will remove the following entry from the registry:
 
-{ "registration_status": "<REGISTRATION_STATUS>", "local_location": "/home/package/",
-"remote_location": "<GIT_URL>" }
+    {
+        "registration_status": "<REGISTRATION_STATUS>",
+        "local_location": "/home/package/",
+        "remote_location": "<GIT_URL>"
+    }
 
-<REGISTRATION_STATUS> can be Registered: when the discovered git repository has a remote Known: when
-the discovered git repository has no remotes
+<REGISTRATION_STATUS> can be
+    Registered: when the discovered git repository has a remote
+    Known: when the discovered git repository has no remotes
 
-[Errors] An error is returned when: the given <REGISTRY_PATH> does not point to a valid registry
-file
+[Errors]
+An error is returned when:
+    the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
     knapsac --registry-path <REGISTRY_PATH> remove <PACKAGE_LOCATION>
@@ -159,25 +155,23 @@ ARGS:
 OPTIONS:
     -h, --help
             Print help information
-
-###########
-Download
-###########
-
+\n###########\nDownload\n###########\n
 knapsac-download 
 Downloads the package and adds it to the registry
 
-[Examples] ./knapsac -r /home/registry.json download https://example.com/user/package
+[Examples]
+    ./knapsac -r /home/registry.json download https://example.com/user/package
 /home/my_user/package_root
 
-will download the package located at 'https://example.com/user/package' and store it in a random
-subdirectory of '/home/my_user/package_root/` (e.g. `/home/my_user/package_root/Yo1Tr9F3iF-
-LFHX9i9GvA')
+will download the package located at 'https://example.com/user/package'
+and store it in a random subdirectory of '/home/my_user/package_root/`
+(e.g. `/home/my_user/package_root/Yo1Tr9F3iF-LFHX9i9GvA')
 
 Then the packages will be registered in the registry at `/home/registry.json`
 
-[Errors] An error is returned when: the given <REGISTRY_PATH> does not point to a valid registry
-file
+[Errors]
+An error is returned when:
+    the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
     knapsac --registry-path <REGISTRY_PATH> download <PACKAGE_LOCATION> <TARGET_LOCATION>
@@ -220,7 +214,7 @@ ARGS:
             
             [Environment]
             
-            [env: KNAPSAC_PACKAGE_ROOT=/Users/job/package_root]
+            [env: KNAPSAC_PACKAGE_ROOT=]
 
 OPTIONS:
     -h, --help

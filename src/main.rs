@@ -29,8 +29,14 @@ fn main() {
             registry = load_registry(&registry_path);
             download(&mut registry, package_location, &target_location);
         }
-        // Command::AddDependency { path, value } => registry.add_dependency(&path, value),
-        // Command::RemoveDependency { path, value } => registry.remove_dependency(&path, value),
+        Command::AddDependency { package_location, value } => {
+            registry = load_registry(&registry_path);
+            registry.add_dependency(&package_location, value)
+        },
+        Command::RemoveDependency { package_location, value } => {
+            registry = load_registry(&registry_path);
+            registry.remove_dependency(&package_location, value)
+        },
     }
     registry.save(&registry_path);
 }

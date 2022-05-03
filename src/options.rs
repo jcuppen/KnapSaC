@@ -56,6 +56,7 @@ pub(crate) enum Command {
     /// [Errors]
     /// An error is returned when:
     ///     the given <REGISTRY_PATH> does not point to a valid registry file
+    #[clap(verbatim_doc_comment)]
     Add {
         /// Path to the package
         ///
@@ -99,6 +100,8 @@ pub(crate) enum Command {
     /// [Errors]
     /// An error is returned when:
     ///     the given <REGISTRY_PATH> does not point to a valid registry file
+    ///
+    #[clap(verbatim_doc_comment)]
     Remove {
         /// Path to the package
         ///
@@ -140,6 +143,7 @@ pub(crate) enum Command {
     /// [Errors]
     /// An error is returned when:
     ///     the given <REGISTRY_PATH> does not point to a valid registry file
+    #[clap(verbatim_doc_comment)]
     Download {
         /// Git Url of remote location of package
         ///
@@ -180,20 +184,86 @@ pub(crate) enum Command {
         #[clap(verbatim_doc_comment)]
         target_location: PathBuf,
     },
-    // /// Adds a new dependency to the provided entry
-    // AddDependency {
-    //     #[structopt(short = "v")]
-    //     value: String,
-    //     /// Path to entry where the dependency should be added
-    //     path: PathBuf,
-    // },
-    // /// Remove a dependency for the provided entry
-    // RemoveDependency {
-    //     #[structopt(short = "v")]
-    //     value: String,
-    //     /// Path to entry where the dependency should be removed
-    //     path: PathBuf,
-    // },
+    /// Adds a new dependency to the provided entry
+    ///
+    #[clap(verbatim_doc_comment)]
+    AddDependency {
+        /// Git Url of remote location of package
+        ///
+        /// The given <PACKAGE_LOCATION> must be a valid git url (http or https)
+        ///
+        /// [Examples]
+        ///     http://example.com/user/package
+        ///     http://example.com/user/package.git
+        ///     https://example.com/user/package
+        ///     https://example.com/user/package.git
+        ///
+        /// [Caveats]
+        /// Only supports 'http' and 'https' urls
+        /// SSH is currently not supported
+        #[clap(short)]
+        #[clap(verbatim_doc_comment)]
+        value: Url,
+        /// Path to entry where the dependency should be added
+        ///
+        /// Use double quotes (") when path contains spaces or escape spaces
+        /// Paths with environment variables are allowed
+        /// Path has to point to a file in a git repository
+        /// Relative paths are allowed
+        ///
+        /// [Examples]
+        ///     /home/my_user/package/
+        ///     /home/my_user/package/file.txt
+        ///     /home/my_user/package/nested/dir
+        ///     /home/my_user/package/some\ file.txt
+        ///     "/home/my_user/package/some file.txt"
+        ///     $HOME/package/
+        ///
+        /// [Errors]
+        /// An error is returned when:
+        ///     the given <PACKAGE_LOCATION> does not point to a valid git repository
+        #[clap(verbatim_doc_comment)]
+        package_location: PathBuf,
+    },
+    /// Remove a dependency for the provided entry
+    RemoveDependency {
+        /// Git Url of remote location of package
+        ///
+        /// The given <PACKAGE_LOCATION> must be a valid git url (http or https)
+        ///
+        /// [Examples]
+        ///     http://example.com/user/package
+        ///     http://example.com/user/package.git
+        ///     https://example.com/user/package
+        ///     https://example.com/user/package.git
+        ///
+        /// [Caveats]
+        /// Only supports 'http' and 'https' urls
+        /// SSH is currently not supported
+        #[clap(short)]
+        #[clap(verbatim_doc_comment)]
+        value: Url,
+        /// Path to entry where the dependency should be removed
+        ///
+        /// Use double quotes (") when path contains spaces or escape spaces
+        /// Paths with environment variables are allowed
+        /// Path has to point to a file in a git repository
+        /// Relative paths are allowed
+        ///
+        /// [Examples]
+        ///     /home/my_user/package/
+        ///     /home/my_user/package/file.txt
+        ///     /home/my_user/package/nested/dir
+        ///     /home/my_user/package/some\ file.txt
+        ///     "/home/my_user/package/some file.txt"
+        ///     $HOME/package/
+        ///
+        /// [Errors]
+        /// An error is returned when:
+        ///     the given <PACKAGE_LOCATION> does not point to a valid git repository
+        #[clap(verbatim_doc_comment)]
+        package_location: PathBuf,
+    },
     // /// Check if local registry contains a certain entry
     // Contains(SearchVariant),
 }
