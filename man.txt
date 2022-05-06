@@ -1,4 +1,8 @@
-\n###########\nMain\n###########\n
+
+###########
+Main
+###########
+
 knapsac 
 
 USAGE:
@@ -29,31 +33,50 @@ OPTIONS:
             
             [Environment]
             
-            [env: KNAPSAC_REGISTRY_PATH=]
+            [env: KNAPSAC_REGISTRY_PATH=/home/job/registry.json]
 
 SUBCOMMANDS:
     add
             Adds a package to the registry
+    add-dependency
+            Adds a new dependency to the provided entry
+    add-module
+            Add a module to the provided entry
     download
             Downloads the package and adds it to the registry
     help
             Print this message or the help of the given subcommand(s)
     initialize
             Creates an empty registry at the given <REGISTRY_PATH>
-            Overwrites any file already present
     remove
             Removes a package from the registry
-\n###########\nInitialize\n###########\n
+    remove-dependency
+            Remove a dependency for the provided entry
+    remove-module
+            Remove a module from the provided entry
+    search
+            
+
+###########
+Initialize
+###########
+
 knapsac-initialize 
 Creates an empty registry at the given <REGISTRY_PATH>
+
 Overwrites any file already present
 
 USAGE:
     knapsac --registry-path <REGISTRY_PATH> initialize
 
 OPTIONS:
-    -h, --help    Print help information
-\n###########\nAdd\n###########\n
+    -h, --help
+            Print help information
+
+###########
+Add
+###########
+
 knapsac-add 
 Adds a package to the registry
 
@@ -65,24 +88,19 @@ It is assumed there is a git repository on disk located at '/home/my_user/packag
 will result in the following entry being added to the registry:
 
     {
-        "registration_status": "<REGISTRATION_STATUS>",
         "local_location": "/home/package/",
         "remote_location": "<GIT_URL>"
     }
-
-<REGISTRATION_STATUS> can be
-    Registered: when the discovered git repository has a remote
-    Known: when the discovered git repository has no remotes
 
 [Errors]
 An error is returned when:
     the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
-    knapsac --registry-path <REGISTRY_PATH> add <PACKAGE_LOCATION>
+    knapsac --registry-path <REGISTRY_PATH> add <PACKAGE_PATH>
 
 ARGS:
-    <PACKAGE_LOCATION>
+    <PACKAGE_PATH>
             Path to the package
             
             Use double quotes (") when path contains spaces or escape spaces
@@ -100,12 +118,16 @@ ARGS:
             
             [Errors]
             An error is returned when:
-                the given <PACKAGE_LOCATION> does not point to a valid git repository
+                the given <PACKAGE_PATH> does not point to a valid git repository
 
 OPTIONS:
     -h, --help
             Print help information
-\n###########\nRemove\n###########\n
+
+###########
+Remove
+###########
+
 knapsac-remove 
 Removes a package from the registry
 
@@ -115,24 +137,19 @@ Removes a package from the registry
 will remove the following entry from the registry:
 
     {
-        "registration_status": "<REGISTRATION_STATUS>",
         "local_location": "/home/package/",
         "remote_location": "<GIT_URL>"
     }
-
-<REGISTRATION_STATUS> can be
-    Registered: when the discovered git repository has a remote
-    Known: when the discovered git repository has no remotes
 
 [Errors]
 An error is returned when:
     the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
-    knapsac --registry-path <REGISTRY_PATH> remove <PACKAGE_LOCATION>
+    knapsac --registry-path <REGISTRY_PATH> remove <PACKAGE_PATH>
 
 ARGS:
-    <PACKAGE_LOCATION>
+    <PACKAGE_PATH>
             Path to the package
             
             Use double quotes (") when path contains spaces or escape spaces
@@ -150,12 +167,16 @@ ARGS:
             
             [Errors]
             An error is returned when:
-                the given <PACKAGE_LOCATION> does not point to a valid git repository
+                the given <PACKAGE_PATH> does not point to a valid git repository
 
 OPTIONS:
     -h, --help
             Print help information
-\n###########\nDownload\n###########\n
+
+###########
+Download
+###########
+
 knapsac-download 
 Downloads the package and adds it to the registry
 
@@ -174,7 +195,7 @@ An error is returned when:
     the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
-    knapsac --registry-path <REGISTRY_PATH> download <PACKAGE_LOCATION> <TARGET_LOCATION>
+    knapsac --registry-path <REGISTRY_PATH> download <PACKAGE_LOCATION> <PACKAGE_ROOT>
 
 ARGS:
     <PACKAGE_LOCATION>
@@ -192,8 +213,8 @@ ARGS:
             Only supports 'http' and 'https' urls
             SSH is currently not supported
 
-    <TARGET_LOCATION>
-            Path to where package must be downloaded to
+    <PACKAGE_ROOT>
+            Path to directory where the package must be downloaded to
             
             Use double quotes (") when path contains spaces or escape spaces
             Paths with environment variables are allowed
@@ -209,12 +230,224 @@ ARGS:
             
             [Errors]
             An error is returned when:
-                the given <TARGET_LOCATION> does not point to an existing directory
-                the given <TARGET_LOCATION> points to a file
+                the given <PACKAGE_ROOT> does not point to an existing directory
+                the given <PACKAGE_ROOT> points to a file
             
             [Environment]
             
             [env: KNAPSAC_PACKAGE_ROOT=]
+
+OPTIONS:
+    -h, --help
+            Print help information
+
+###########
+Add Dependency
+###########
+
+knapsac-add-dependency 
+Adds a new dependency to the provided entry
+
+USAGE:
+    knapsac --registry-path <REGISTRY_PATH> add-dependency -v <VALUE> <PACKAGE_PATH>
+
+ARGS:
+    <PACKAGE_PATH>
+            Path to entry which the dependency should be added to
+            
+            Use double quotes (") when path contains spaces or escape spaces
+            Paths with environment variables are allowed
+            Path has to point to a file in a git repository
+            Relative paths are allowed
+            
+            [Examples]
+                /home/my_user/package/
+                /home/my_user/package/file.txt
+                /home/my_user/package/nested/dir
+                /home/my_user/package/some\ file.txt
+                "/home/my_user/package/some file.txt"
+                $HOME/package/
+            
+            [Errors]
+            An error is returned when:
+                the given <PACKAGE_PATH> does not point to a valid git repository
+
+OPTIONS:
+    -h, --help
+            Print help information
+
+    -v <VALUE>
+            Git Url of remote location of package
+            
+            The given <VALUE> must be a valid git url (http or https)
+            
+            [Examples]
+                http://example.com/user/package
+                http://example.com/user/package.git
+                https://example.com/user/package
+                https://example.com/user/package.git
+            
+            [Caveats]
+            Only supports 'http' and 'https' urls
+            SSH is currently not supported
+
+###########
+Remove Dependency
+###########
+
+knapsac-remove-dependency 
+Remove a dependency for the provided entry
+
+USAGE:
+    knapsac --registry-path <REGISTRY_PATH> remove-dependency -v <VALUE> <PACKAGE_PATH>
+
+ARGS:
+    <PACKAGE_PATH>
+            Path to entry where the dependency should be removed
+            
+            Use double quotes (") when path contains spaces or escape spaces
+            Paths with environment variables are allowed
+            Path has to point to a file in a git repository
+            Relative paths are allowed
+            
+            [Examples]
+                /home/my_user/package/
+                /home/my_user/package/file.txt
+                /home/my_user/package/nested/dir
+                /home/my_user/package/some\ file.txt
+                "/home/my_user/package/some file.txt"
+                $HOME/package/
+            
+            [Errors]
+            An error is returned when:
+                the given <PACKAGE_PATH> does not point to a valid git repository
+
+OPTIONS:
+    -h, --help
+            Print help information
+
+    -v <VALUE>
+            Git Url of remote location of package
+            
+            The given <VALUE> must be a valid git url (http or https)
+            
+            [Examples]
+                http://example.com/user/package
+                http://example.com/user/package.git
+                https://example.com/user/package
+                https://example.com/user/package.git
+            
+            [Caveats]
+            Only supports 'http' and 'https' urls
+            SSH is currently not supported
+
+###########
+Add Module
+###########
+
+knapsac-add-module 
+Add a module to the provided entry
+
+[Examples]
+Assuming the registry referenced by <REGISTRY_PATH> contains the following entry:
+
+    {
+        "local_location": "/home/package/",
+        "remote_location": "<GIT_URL>"
+    }
+
+the following command
+
+   ./knapsac -r /home/registry.json add-module /home/package/a.txt -i my_a
+
+will add this to the Package's manifest file
+
+    {
+        "identifier": "my_a",
+        "location": "a.txt"
+    }
+
+When the identifier is omitted the file stem will be used as the identifier instead.
+
+    ./knapsac -r /home/registry.json add-module /home/package/a.txt
+
+will add the following to the Package's manifest file
+
+    {
+        "identifier": "a",
+        "location": "a.txt"
+    }
+
+USAGE:
+    knapsac --registry-path <REGISTRY_PATH> add-module [OPTIONS] <MODULE_PATH>
+
+ARGS:
+    <MODULE_PATH>
+            Path to module file that needs to be added
+            KnapSaC will automatically attempt detect the relevant package
+            
+            Use double quotes (") when path contains spaces or escape spaces
+            Paths with environment variables are allowed
+            Path has to point to a file in a git repository of a package that is in the registry
+            Relative paths are allowed
+            
+            [Examples]
+                /home/my_user/package/file.txt
+                /home/my_user/package/some\ file.txt
+                "/home/my_user/package/some file.txt"
+            
+            [Errors]
+            An error is returned when:
+                the given <MODULE_PATH> does not point to a valid git repository
+                the given <MODULE_PATH> does not point to a file
+                the given <MODULE_PATH> points to a Packages not in the registry pointed to by
+            <REGISTRY_PATH>
+
+OPTIONS:
+    -h, --help
+            Print help information
+
+    -i <IDENTIFIER>
+            Identifier for the module
+            
+            Use double quotes (") when the identifier contains spaces or escape spaces
+            
+            [Examples]
+                my_identifier
+                my\ identifier
+                "my identifier"
+
+###########
+Remove Module
+###########
+
+knapsac-remove-module 
+Remove a module from the provided entry
+
+USAGE:
+    knapsac --registry-path <REGISTRY_PATH> remove-module <MODULE_PATH>
+
+ARGS:
+    <MODULE_PATH>
+            Path to module file that needs to be removed
+            KnapSaC will automatically attempt detect the relevant package.
+            
+            Use double quotes (") when path contains spaces or escape spaces
+            Paths with environment variables are allowed
+            Path has to point to a file in a git repository of a package that is in the registry
+            Relative paths are allowed
+            
+            [Examples]
+                /home/my_user/package/file.txt
+                /home/my_user/package/some\ file.txt
+                "/home/my_user/package/some file.txt"
+            
+            [Errors]
+            An error is returned when:
+                the given <MODULE_PATH> does not point to a valid git repository
+                the given <MODULE_PATH> does not point to a file
+                the given <MODULE_PATH> points to a Packages not in the registry pointed to by
+            <REGISTRY_PATH>
 
 OPTIONS:
     -h, --help

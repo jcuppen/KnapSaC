@@ -44,14 +44,9 @@ pub(crate) enum Command {
     /// will result in the following entry being added to the registry:
     ///
     ///     {
-    ///         "registration_status": "<REGISTRATION_STATUS>",
     ///         "local_location": "/home/package/",
     ///         "remote_location": "<GIT_URL>"
     ///     }
-    ///
-    /// <REGISTRATION_STATUS> can be
-    ///     Registered: when the discovered git repository has a remote
-    ///     Known: when the discovered git repository has no remotes
     ///
     /// [Errors]
     /// An error is returned when:
@@ -75,10 +70,10 @@ pub(crate) enum Command {
         ///
         /// [Errors]
         /// An error is returned when:       
-        ///     the given <PACKAGE_LOCATION> does not point to a valid git repository
+        ///     the given <PACKAGE_PATH> does not point to a valid git repository
         #[clap(parse(from_os_str))]
         #[clap(verbatim_doc_comment)]
-        package_location: PathBuf,
+        package_path: PathBuf,
     },
     /// Removes a package from the registry
     ///
@@ -88,14 +83,9 @@ pub(crate) enum Command {
     /// will remove the following entry from the registry:
     ///
     ///     {
-    ///         "registration_status": "<REGISTRATION_STATUS>",
     ///         "local_location": "/home/package/",
     ///         "remote_location": "<GIT_URL>"
     ///     }
-    ///
-    /// <REGISTRATION_STATUS> can be
-    ///     Registered: when the discovered git repository has a remote
-    ///     Known: when the discovered git repository has no remotes
     ///
     /// [Errors]
     /// An error is returned when:
@@ -120,12 +110,13 @@ pub(crate) enum Command {
         ///
         /// [Errors]
         /// An error is returned when:       
-        ///     the given <PACKAGE_LOCATION> does not point to a valid git repository
+        ///     the given <PACKAGE_PATH> does not point to a valid git repository
         #[clap(parse(from_os_str))]
         #[clap(verbatim_doc_comment)]
-        package_location: PathBuf,
+        package_path: PathBuf,
     },
     /// Creates an empty registry at the given <REGISTRY_PATH>
+    ///
     /// Overwrites any file already present
     #[clap(verbatim_doc_comment)]
     Initialize,
@@ -160,7 +151,7 @@ pub(crate) enum Command {
         /// SSH is currently not supported
         #[clap(verbatim_doc_comment)]
         package_location: Url,
-        /// Path to where package must be downloaded to
+        /// Path to directory where the package must be downloaded to
         ///
         /// Use double quotes (") when path contains spaces or escape spaces
         /// Paths with environment variables are allowed
@@ -175,22 +166,21 @@ pub(crate) enum Command {
         ///
         /// [Errors]
         /// An error is returned when:       
-        ///     the given <TARGET_LOCATION> does not point to an existing directory
-        ///     the given <TARGET_LOCATION> points to a file
+        ///     the given <PACKAGE_ROOT> does not point to an existing directory
+        ///     the given <PACKAGE_ROOT> points to a file
         ///
         /// [Environment]
         #[clap(env = "KNAPSAC_PACKAGE_ROOT")]
         #[clap(parse(from_os_str))]
         #[clap(verbatim_doc_comment)]
-        target_location: PathBuf,
+        package_root: PathBuf,
     },
     /// Adds a new dependency to the provided entry
-    ///
     #[clap(verbatim_doc_comment)]
     AddDependency {
         /// Git Url of remote location of package
         ///
-        /// The given <PACKAGE_LOCATION> must be a valid git url (http or https)
+        /// The given <VALUE> must be a valid git url (http or https)
         ///
         /// [Examples]
         ///     http://example.com/user/package
@@ -204,7 +194,7 @@ pub(crate) enum Command {
         #[clap(short)]
         #[clap(verbatim_doc_comment)]
         value: Url,
-        /// Path to entry where the dependency should be added
+        /// Path to entry which the dependency should be added to
         ///
         /// Use double quotes (") when path contains spaces or escape spaces
         /// Paths with environment variables are allowed
@@ -221,15 +211,15 @@ pub(crate) enum Command {
         ///
         /// [Errors]
         /// An error is returned when:
-        ///     the given <PACKAGE_LOCATION> does not point to a valid git repository
+        ///     the given <PACKAGE_PATH> does not point to a valid git repository
         #[clap(verbatim_doc_comment)]
-        package_location: PathBuf,
+        package_path: PathBuf,
     },
     /// Remove a dependency for the provided entry
     RemoveDependency {
         /// Git Url of remote location of package
         ///
-        /// The given <PACKAGE_LOCATION> must be a valid git url (http or https)
+        /// The given <VALUE> must be a valid git url (http or https)
         ///
         /// [Examples]
         ///     http://example.com/user/package
@@ -260,10 +250,102 @@ pub(crate) enum Command {
         ///
         /// [Errors]
         /// An error is returned when:
-        ///     the given <PACKAGE_LOCATION> does not point to a valid git repository
+        ///     the given <PACKAGE_PATH> does not point to a valid git repository
         #[clap(verbatim_doc_comment)]
-        package_location: PathBuf,
+        package_path: PathBuf,
     },
-    // /// Check if local registry contains a certain entry
-    // Contains(SearchVariant),
+    /// Add a module to the provided entry
+    ///
+    /// [Examples]
+    /// Assuming the registry referenced by <REGISTRY_PATH> contains the following entry:
+    ///
+    ///     {
+    ///         "local_location": "/home/package/",
+    ///         "remote_location": "<GIT_URL>"
+    ///     }
+    ///
+    /// the following command
+    ///
+    ///    ./knapsac -r /home/registry.json add-module /home/package/a.txt -i my_a
+    ///
+    /// will add this to the Package's manifest file
+    ///
+    ///     {
+    ///         "identifier": "my_a",
+    ///         "location": "a.txt"
+    ///     }
+    ///
+    /// When the identifier is omitted the file stem will be used as the identifier instead.
+    ///
+    ///     ./knapsac -r /home/registry.json add-module /home/package/a.txt
+    ///
+    /// will add the following to the Package's manifest file
+    ///
+    ///     {
+    ///         "identifier": "a",
+    ///         "location": "a.txt"
+    ///     }
+    ///
+    #[clap(verbatim_doc_comment)]
+    AddModule {
+        /// Path to module file that needs to be added
+        /// KnapSaC will automatically attempt detect the relevant package
+        ///
+        /// Use double quotes (") when path contains spaces or escape spaces
+        /// Paths with environment variables are allowed
+        /// Path has to point to a file in a git repository of a package that is in the registry
+        /// Relative paths are allowed
+        ///
+        /// [Examples]
+        ///     /home/my_user/package/file.txt
+        ///     /home/my_user/package/some\ file.txt
+        ///     "/home/my_user/package/some file.txt"
+        ///
+        /// [Errors]
+        /// An error is returned when:
+        ///     the given <MODULE_PATH> does not point to a valid git repository
+        ///     the given <MODULE_PATH> does not point to a file
+        ///     the given <MODULE_PATH> points to a Packages not in the registry pointed to by <REGISTRY_PATH>
+        #[clap(verbatim_doc_comment)]
+        module_path: PathBuf,
+        /// Identifier for the module
+        ///
+        /// Use double quotes (") when the identifier contains spaces or escape spaces
+        ///
+        /// [Examples]
+        ///     my_identifier
+        ///     my\ identifier
+        ///     "my identifier"
+        ///
+        #[clap(verbatim_doc_comment)]
+        #[clap(short)]
+        identifier: Option<String>,
+    },
+    /// Remove a module from the provided entry
+    #[clap(verbatim_doc_comment)]
+    RemoveModule {
+        /// Path to module file that needs to be removed
+        /// KnapSaC will automatically attempt detect the relevant package.
+        ///
+        /// Use double quotes (") when path contains spaces or escape spaces
+        /// Paths with environment variables are allowed
+        /// Path has to point to a file in a git repository of a package that is in the registry
+        /// Relative paths are allowed
+        ///
+        /// [Examples]
+        ///     /home/my_user/package/file.txt
+        ///     /home/my_user/package/some\ file.txt
+        ///     "/home/my_user/package/some file.txt"
+        ///
+        /// [Errors]
+        /// An error is returned when:
+        ///     the given <MODULE_PATH> does not point to a valid git repository
+        ///     the given <MODULE_PATH> does not point to a file
+        ///     the given <MODULE_PATH> points to a Packages not in the registry pointed to by <REGISTRY_PATH>
+        #[clap(verbatim_doc_comment)]
+        module_path: PathBuf,
+    },
+    Search {
+        modules: Vec<String>,
+    }
 }
