@@ -347,5 +347,5 @@ pub(crate) enum Command {
     },
     Search {
         modules: Vec<String>,
-    }
+    },
 }
