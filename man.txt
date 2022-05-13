@@ -1,4 +1,4 @@
--e 
+
 ###########
 Main
 ###########
@@ -41,18 +41,16 @@ SUBCOMMANDS:
     help
             Print this message or the help of the given subcommand(s)
     initialize
-            Creates an empty registry at the given <REGISTRY_PATH>
+            HELLO
     remove
             Removes a module from the registry
--e 
+
 ###########
 Initialize
 ###########
 
 knapsac-initialize 
-Creates an empty registry at the given <REGISTRY_PATH>
-
-Overwrites any file already present
+LONG HELLO
 
 USAGE:
     knapsac --registry-path <REGISTRY_PATH> initialize
@@ -60,7 +58,7 @@ USAGE:
 OPTIONS:
     -h, --help
             Print help information
--e 
+
 ###########
 Add
 ###########
@@ -76,19 +74,6 @@ The following command:
 will result in the following entry being added to the registry:
 
     {
-        "identifier", "file",
-        "local_location": "/home/my_user/file.txt"
-    }
-
-By default the file stem (file name minus file extension) is used as identifier.
-One can also use the `-i` flag to provide an identifier:
-
-    ./knapsac -r /home/my_user/registry.json add -i my_file /home/my_user/file.txt
-
-will result in the following entry being added to the registry:
-
-    {
-        "identifier": "my_file",
         "local_location": "/home/my_user/file.txt"
     }
 
@@ -97,7 +82,7 @@ An error is returned when:
     the given <REGISTRY_PATH> does not point to a valid registry file
 
 USAGE:
-    knapsac --registry-path <REGISTRY_PATH> add [OPTIONS] <MODULE_PATH>
+    knapsac --registry-path <REGISTRY_PATH> add <MODULE_PATH>
 
 ARGS:
     <MODULE_PATH>
@@ -121,16 +106,6 @@ OPTIONS:
     -h, --help
             Print help information
 
-    -i, --identifier <IDENTIFIER>
-            Identifier to use
-            
-            Use double quotes (") when path contains spaces or escape spaces
-            
-            [Examples]
-                my_file
-                my\ file
-                "my file"
--e 
 ###########
 Remove
 ###########
@@ -144,7 +119,6 @@ Removes a module from the registry
 will remove the following entry from the registry:
 
     {
-        "identifier", "file",
         "local_location": "/home/my_user/file.txt"
     }
 

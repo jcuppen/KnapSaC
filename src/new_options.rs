@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
+use crate::{Add, Initialize, Remove};
+use crate::subcommands::add_dependency::AddDependency;
 
 #[derive(Parser)]
 pub(crate) struct Cli {
@@ -33,79 +35,8 @@ pub(crate) struct Cli {
 
 #[derive(Subcommand)]
 pub(crate) enum Command {
-    /// Adds a module to the registry
-    ///
-    /// [Examples]
-    /// The following command:
-    ///    
-    ///     ./knapsac -r /home/my_user/registry.json add /home/my_user/file.txt
-    ///
-    /// will result in the following entry being added to the registry:
-    ///
-    ///     {
-    ///         "local_location": "/home/my_user/file.txt"
-    ///     }
-    ///
-    /// [Errors]
-    /// An error is returned when:
-    ///     the given <REGISTRY_PATH> does not point to a valid registry file
-    #[clap(verbatim_doc_comment)]
-    Add {
-        /// Path to the module
-        ///
-        /// Use double quotes (") when path contains spaces or escape spaces
-        /// Paths with environment variables are allowed
-        /// Path has to point to a file in a git repository
-        ///
-        /// [Examples]
-        ///     /home/my_user/file.txt
-        ///     /home/my\ user/file.txt
-        ///     "/home/my user/file.txt"
-        ///     $HOME/file.txt
-        ///
-        /// [Errors]
-        /// An error is returned when:       
-        ///     - the given <MODULE_PATH> does point to an existing module.
-        #[clap(parse(from_os_str))]
-        #[clap(verbatim_doc_comment)]
-        module_path: PathBuf,
-    },
-    /// Removes a module from the registry
-    ///
-    /// [Examples]    
-    ///     ./knapsac -r /home/my_user/registry.json remove /home/my_user/file.txt
-    ///
-    /// will remove the following entry from the registry:
-    ///
-    ///     {
-    ///         "local_location": "/home/my_user/file.txt"
-    ///     }
-    ///
-    /// [Errors]
-    /// An error is returned when:
-    ///     the given <REGISTRY_PATH> does not point to a valid registry file
-    ///
-    #[clap(verbatim_doc_comment)]
-    Remove {
-        /// Path to the package
-        ///
-        /// Use double quotes (") when path contains spaces or escape spaces
-        /// Paths with environment variables are allowed
-        /// Path has to point to a file in a git repository
-        ///
-        /// [Examples]
-        ///     /home/my_user/file.txt
-        ///     /home/my\ user/file.txt
-        ///     "/home/my user/file.txt"
-        ///     $HOME/file.txt
-        ///
-        #[clap(parse(from_os_str))]
-        #[clap(verbatim_doc_comment)]
-        module_path: PathBuf,
-    },
-    /// Creates an empty registry at the given <REGISTRY_PATH>
-    ///
-    /// Overwrites any file already present
-    #[clap(verbatim_doc_comment)]
-    Initialize,
+    Add(Add),
+    Remove(Remove),
+    Initialize(Initialize),
+    AddDependency(AddDependency)
 }
