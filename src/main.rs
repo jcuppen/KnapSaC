@@ -4,30 +4,39 @@ mod new_options;
 mod subcommands;
 
 use crate::new_options::{Cli, Command};
+use crate::subcommands::add::AddCommand;
+use crate::subcommands::remove::RemoveCommand;
+use crate::subcommands::{add, get, remove};
+use crate::subcommands::get::GetCommand;
 use clap::Parser;
-use std::path::PathBuf;
-use crate::subcommands::add::Add;
-use crate::subcommands::add_dependency::AddDependency;
-use crate::subcommands::initialize::Initialize;
-use crate::subcommands::remove::Remove;
 
 fn main() {
-    let cli = Cli::parse();
-
-    let registry_path: PathBuf = cli.registry_path;
+    let cli: Cli = Cli::parse();
 
     match cli.command {
-        Command::Initialize(_) => Initialize::handle_command(registry_path),
-        Command::Add(Add { module_path }) => {
-            Add::handle_command(&registry_path, module_path)
+        Command::Add(a) => match a.command {
+            AddCommand::Module(args) => {
+                add::module::Module::handle_command(args.identifier, args.output_path)
+            }
+            AddCommand::Dependency(args) => add::dependency::Dependency::handle_command(
+                &args.module_identifier,
+                &args.dependency_identifier,
+            ),
         },
-        Command::Remove(Remove { module_path }) => {
-            Remove::handle_command(&registry_path, &module_path)
-        }
-        Command::AddDependency(AddDependency { module_path, dependency_path}) => {
-            AddDependency::handle_command(&registry_path, &module_path, &dependency_path)
-        }
+        Command::Remove(r) => match r.command {
+            RemoveCommand::Module(args) => {
+                remove::module::Module::handle_command( &args.identifier)
+            }
+        },
+        Command::Get(g) => match g.command {
+            GetCommand::Dependency(args) => get::dependency::Dependency::handle_command(
+                &args.module_identifier,
+                &args.dependency_identifier,
+            ),
+            GetCommand::Module(args) => get::module::Module::handle_command(&args.identifier),
+        },
     }
+    std::process::exit(0);
 
     // match cli.command {
     //     Command::Add { package_path } => match Registry::load(&registry_path) {

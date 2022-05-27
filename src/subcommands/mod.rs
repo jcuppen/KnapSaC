@@ -1,14 +1,14 @@
 pub(crate) mod add;
-pub(crate) mod initialize;
+pub(crate) mod get;
 pub(crate) mod remove;
-pub(crate) mod add_dependency;
 
-use knapsac_lib::error::{ModuleError, PackageError, RegistryError};
-use std::fmt::{Display, Formatter};
-use std::path::{Path, PathBuf};
-use std::process::exit;
-use crate::subcommands::MessageType::{Error, Info, Warning};
+// use crate::subcommands::MessageType::{Error, Info, Warning};
 
+// use knapsac_lib::error::{ModuleError, PackageError, RegistryError};
+// use std::fmt::{Display, Formatter};
+// use std::path::Path;
+// use std::process::exit;
+/*
 enum MessageType {
     Info,
     Warning,
@@ -47,38 +47,76 @@ pub trait Subcommand {
         exit(1)
     }
 
-    fn print_load_registry_message(registry_path: &PathBuf) {
+    fn print_load_registry_message(registry_path: &Path) {
         Self::print_message(format!(
             "Loading registry located @ {}",
             registry_path.display()
         ));
     }
 
-    fn print_search_module_message(module_path: &Path) {
-        Self::print_message(format!("Searching for module located @ {}", module_path.display()));
+    fn print_search_module_message(output_path: &Path) {
+        Self::print_message(format!(
+            "Searching for module with <OUTPUT_PATH> ({})",
+            output_path.display()
+        ));
     }
-    fn print_module_not_found_message(module_path: &Path) {
-        Self::print_message(format!("No module found in registry that was located @ {}", module_path.display()));
+    fn print_module_not_found_message(output_path: &Path) {
+        Self::print_message(format!(
+            "No module found in registry @ <OUTPUT_PATH> ({})",
+            output_path.display()
+        ));
+    }
+    fn print_no_such_dependency_message(output_path: &Path, identifier: &str) {
+        Self::print_message(format!(
+            "No dependency found for identifier '{}' for module with <OUTPUT_PATH> ({})",
+            identifier,
+            output_path.display()
+        ));
     }
 
-    fn print_registry_error<P: AsRef<Path>>(e: RegistryError, registry_path: P) -> ! {
+    fn print_registry_error(
+        e: RegistryError,
+        registry_path: &Path,
+        output_path: Option<&Path>,
+    ) -> ! {
         let msg = match e {
             RegistryError::RegistryPathNotAbsolute => {
-                "<REGISTRY_PATH> is not an absolute path".to_string()
+                format!(
+                    "<REGISTRY_PATH> ({}) is not an absolute path",
+                    registry_path.display()
+                )
             }
             RegistryError::RegistryPathNotJSON => {
-                "<REGISTRY_PATH> does not point to a JSON file".to_string()
+                format!(
+                    "<REGISTRY_PATH> ({}) does not point to a JSON file",
+                    registry_path.display()
+                )
             }
             RegistryError::RegistryPathNotFile => {
-                "<REGISTRY_PATH> does not point to a file".to_string()
+                format!(
+                    "<REGISTRY_PATH> ({})' does not point to a file",
+                    registry_path.display()
+                )
             }
             RegistryError::NoRegistryFound => {
                 format!(
-                    "No registry found @ {}. Please create one first with  the `initialize` command",
-                    registry_path.as_ref().display()
+                    "No registry found at <REGISTRY_PATH> ({}). Please create one first with  the `initialize` command",
+                    registry_path.display()
                 )
             }
-            RegistryError::InvalidRegistry => "Invalid registry found".to_string(),
+            RegistryError::InvalidRegistry => {
+                format!(
+                    "Invalid registry found at <REGISTRY_PATH> ({})",
+                    registry_path.display()
+                )
+            }
+            RegistryError::ModuleAlreadyInRegistry => {
+                format!(
+                    "The registry at <REGISTRY_PATH> ({}) already contains an entry with <MODULE_PATH> ({})",
+                    registry_path.display(),
+                    output_path.unwrap().display()
+                )
+            }
         };
         Self::print_error(msg)
     }
@@ -101,12 +139,16 @@ pub trait Subcommand {
     }
     fn print_module_error(e: ModuleError) -> ! {
         let msg = match e {
-            ModuleError::LocationNotRelative => "<MODULE_LOCATION> is not relative",
-            ModuleError::LocationNotAbsolute => "<MODULE_LOCATION> is not absolute",
-            ModuleError::DoesNotExist => "<MODULE_LOCATION> does not point to existing file",
+            ModuleError::SourceLocationNotRelative => "<MODULE_LOCATION> is not relative",
+            ModuleError::OutputLocationNotRelative => "<OUTPUT_LOCATION> is not relative",
+            ModuleError::SourceLocationNotAbsolute => "<MODULE_LOCATION> is not absolute",
+            ModuleError::OutputLocationNotAbsolute => "<OUTPUT_LOCATION> is not absolute",
+            ModuleError::SourceLocationDoesNotExist => "<MODULE_LOCATION> does not point to existing file",
+            ModuleError::OutputLocationDoesNotExist => "<OUTPUT_LOCATION> does not point to existing file",
             ModuleError::InvalidManifest => "Module manifest is not a valid manifest file",
             ModuleError::CyclicDependency => "Cyclic dependency detected",
         };
         Self::print_error(msg)
     }
 }
+ */
