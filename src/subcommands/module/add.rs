@@ -1,6 +1,6 @@
-use std::path::{PathBuf};
 use clap::Args;
-use knapsac_lib2::registry::Registry;
+use knapsac_lib::registry::Registry;
+use std::path::PathBuf;
 
 #[derive(Args)]
 /// Adds a module to the registry
@@ -8,20 +8,22 @@ use knapsac_lib2::registry::Registry;
 /// [Examples]
 /// The following command:
 ///
-///     knapsac add module a /home/my_user/a/out
+///     knapsac module add a /home/my_user/a/out
 ///
 /// will result in the following entry being added to the registry:
 ///
 ///     {
-///         "identifier": "a"
-///         "output_location": "/home/my_user/a/out"
+///         "a" : {
+///             "output_path": "/home/my_user/a/out",
+///             "dependencies": [],    
+///         }
 ///     }
 ///
 /// [Errors]
 /// An error is returned when:
 ///     the registry at `~/registry.json` is not valid
 #[clap(verbatim_doc_comment)]
-pub(crate) struct Module {
+pub(crate) struct Add {
     /// Identifier for the dependency
     ///
     /// Use double quotes (") when path contains spaces or escape spaces
@@ -43,20 +45,11 @@ pub(crate) struct Module {
     ///     /home/my\ user/a/out
     ///     "/home/my user/a/out"
     ///     $HOME/a/out
-    ///
-    /// [Errors]
-    /// An error is returned when:
-    ///     - the given <MODULE_OUTPUT_PATH> does not point to an existing directory
     #[clap(parse(from_os_str))]
     #[clap(verbatim_doc_comment)]
     pub(crate) output_path: PathBuf,
 }
 
-impl Module {
-    pub(crate) fn handle_command(
-        identifier: String,
-        output_path: PathBuf,
-    ) {
-        Registry::load().add_module(identifier, output_path);
-    }
+pub(crate) fn handle_command(identifier: String, output_path: PathBuf) {
+    Registry::load().add_module(identifier, output_path);
 }

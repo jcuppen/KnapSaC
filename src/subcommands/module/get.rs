@@ -1,24 +1,22 @@
 use clap::Args;
-use knapsac_lib2::registry::Registry;
+use knapsac_lib::registry::Registry;
+use std::process::exit;
 
 #[derive(Args)]
-/// Removes a module from the registry
+/// Gets a module from the registry
 ///
 /// [Examples]
-///     knapsac remove module a
+/// The following command:
 ///
-/// will remove the following entry from the registry:
+///     knapsac module get a
 ///
-///     {
-///         ...
-///         "identifier": "a"
-///     }
+/// will return the <OUTPUT_PATH> of module 'b'
 ///
 /// [Errors]
 /// An error is returned when:
 ///     the registry at `~/registry.json` is not valid
 #[clap(verbatim_doc_comment)]
-pub(crate) struct Module {
+pub(crate) struct Get {
     /// Identifier for the module
     ///
     /// Use double quotes (") when path contains spaces or escape spaces
@@ -31,8 +29,11 @@ pub(crate) struct Module {
     pub(crate) identifier: String,
 }
 
-impl Module {
-    pub(crate) fn handle_command(identifier: &str) {
-        Registry::load().remove_module(identifier);
+pub(crate) fn handle_command(identifier: &str) {
+    let r = Registry::load();
+    if let Some(m) = r.get_module(identifier) {
+        println!("{}", m.output_path.display());
+    } else {
+        exit(1);
     }
 }

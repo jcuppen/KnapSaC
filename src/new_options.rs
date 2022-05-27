@@ -1,8 +1,6 @@
-use crate::add::Add;
-use crate::remove::Remove;
-
+use crate::subcommands::executable::Executable;
+use crate::subcommands::module::Module;
 use clap::{Parser, Subcommand};
-use crate::get::Get;
 
 #[derive(Parser)]
 pub(crate) struct Cli {
@@ -12,7 +10,6 @@ pub(crate) struct Cli {
 
 #[derive(Subcommand)]
 pub(crate) enum Command {
-    Add(Add),
-    Get(Get),
-    Remove(Remove),
+    Module(Module),
+    Executable(Executable),
 }

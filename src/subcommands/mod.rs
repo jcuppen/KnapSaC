@@ -1,6 +1,5 @@
-pub(crate) mod add;
-pub(crate) mod get;
-pub(crate) mod remove;
+pub(crate) mod executable;
+pub(crate) mod module;
 
 // use crate::subcommands::MessageType::{Error, Info, Warning};
 

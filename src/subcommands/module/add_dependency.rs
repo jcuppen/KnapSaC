@@ -1,23 +1,23 @@
-use std::process::exit;
 use clap::Args;
-use knapsac_lib2::registry::Registry;
+use knapsac_lib::registry::Registry;
 
 #[derive(Args)]
-/// Gets a dependency for a module based on the module's manifest
+/// Adds a dependency to a module
 ///
 /// [Examples]
 /// The following command:
 ///
-///     knapsac get dependency a b
+///     knapsac module add dependency a b
 ///
-/// will return the <OUTPUT_DIRECTORY> of module 'b' which is a dependency of module 'a'
+/// will result add the dependency registered under identifier 'b' to
+/// the module registered under identifier 'a".
 ///
 /// [Errors]
 /// An error is returned when:
 ///     the registry at `~/registry.json` is not valid
 #[clap(verbatim_doc_comment)]
-pub(crate) struct Dependency {
-    /// Identifier for the dependency
+pub(crate) struct AddDependency {
+    /// Identifier for the module (depender)
     ///
     /// Use double quotes (") when path contains spaces or escape spaces
     ///
@@ -39,13 +39,6 @@ pub(crate) struct Dependency {
     pub(crate) dependency_identifier: String,
 }
 
-impl Dependency {
-    pub(crate) fn handle_command(module_identifier: &str, dependency_identifier: &str) {
-        let r = Registry::load();
-        if let Some(d) = r.get_dependency(module_identifier, dependency_identifier) {
-            println!("{}", d.output_directory.display());
-        } else {
-            exit(1);
-        }
-    }
+pub(crate) fn handle_command(module_identifier: &str, dependency_identifier: &str) {
+    Registry::load().add_dependency_to_module(module_identifier, dependency_identifier);
 }

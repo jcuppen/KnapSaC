@@ -4,38 +4,69 @@ mod new_options;
 mod subcommands;
 
 use crate::new_options::{Cli, Command};
-use crate::subcommands::add::AddCommand;
-use crate::subcommands::remove::RemoveCommand;
-use crate::subcommands::{add, get, remove};
-use crate::subcommands::get::GetCommand;
+use crate::subcommands::executable::ExecutableCommand;
+use crate::subcommands::module::ModuleCommand;
+use crate::subcommands::{executable, module};
 use clap::Parser;
 
 fn main() {
     let cli: Cli = Cli::parse();
 
     match cli.command {
-        Command::Add(a) => match a.command {
-            AddCommand::Module(args) => {
-                add::module::Module::handle_command(args.identifier, args.output_path)
+        Command::Module(m) => match m.command {
+            ModuleCommand::Add(args) => {
+                module::add::handle_command(args.identifier, args.output_path)
             }
-            AddCommand::Dependency(args) => add::dependency::Dependency::handle_command(
+            ModuleCommand::AddDependency(args) => module::add_dependency::handle_command(
                 &args.module_identifier,
                 &args.dependency_identifier,
             ),
-        },
-        Command::Remove(r) => match r.command {
-            RemoveCommand::Module(args) => {
-                remove::module::Module::handle_command( &args.identifier)
-            }
-        },
-        Command::Get(g) => match g.command {
-            GetCommand::Dependency(args) => get::dependency::Dependency::handle_command(
+            ModuleCommand::Get(args) => module::get::handle_command(&args.identifier),
+            ModuleCommand::GetDependency(args) => module::get_dependency::handle_command(
                 &args.module_identifier,
                 &args.dependency_identifier,
             ),
-            GetCommand::Module(args) => get::module::Module::handle_command(&args.identifier),
+            ModuleCommand::Remove(args) => module::remove::handle_command(&args.identifier),
+        },
+        Command::Executable(e) => match e.command {
+            ExecutableCommand::Add(args) => executable::add::handle_command(args.source_path),
+            ExecutableCommand::AddDependency(args) => executable::add_dependency::handle_command(
+                &args.source_path,
+                &args.dependency_identifier,
+            ),
+            ExecutableCommand::GetDependency(args) => executable::get_dependency::handle_command(
+                &args.source_path,
+                &args.dependency_identifier,
+            ),
+            ExecutableCommand::Remove(args) => {
+                executable::remove::handle_command(&args.source_path)
+            }
         },
     }
+
+    // match cli.command {
+    //     Command::Add(a) => match a.command {
+    //         AddCommand::Module(args) => {
+    //             add::module::Module::handle_command(args.identifier, args.output_path)
+    //         }
+    //         AddCommand::Dependency(args) => add::dependency::Dependency::handle_command(
+    //             &args.module_identifier,
+    //             &args.dependency_identifier,
+    //         ),
+    //     },
+    //     Command::Remove(r) => match r.command {
+    //         RemoveCommand::Module(args) => {
+    //             remove::module::Module::handle_command( &args.identifier)
+    //         }
+    //     },
+    //     Command::Get(g) => match g.command {
+    //         GetCommand::Dependency(args) => get::dependency::Dependency::handle_command(
+    //             &args.module_identifier,
+    //             &args.dependency_identifier,
+    //         ),
+    //         GetCommand::Module(args) => get::module::Module::handle_command(&args.identifier),
+    //     },
+    // }
     std::process::exit(0);
 
     // match cli.command {
