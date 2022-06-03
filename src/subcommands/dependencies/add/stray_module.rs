@@ -1,8 +1,8 @@
-use crate::entry::Entry;
 use clap::Args;
 use knapsac_lib::registry::Registry;
 use knapsac_lib::Dependency;
 use std::path::PathBuf;
+use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
 /// Adds a dependency to an executable
@@ -30,20 +30,6 @@ impl StrayModule {
     pub(crate) fn handle_command(&self, depender: Entry) {
         let mut r = Registry::load();
         let dependency = Dependency::StrayModule(self.dependency_output_path.clone());
-        match depender {
-            Entry::Executable(source_path) => r.add_dependency_to_executable(
-                &source_path,
-                self.dependency_identifier.clone(),
-                dependency,
-            ),
-            Entry::StandaloneModule(module_identifier) => r.add_dependency_to_module(
-                &module_identifier,
-                self.dependency_identifier.clone(),
-                dependency,
-            ),
-            Entry::PackageModule => {
-                panic!()
-            }
-        }
+        r.add_dependency(depender, self.dependency_identifier.clone(), dependency);
     }
 }

@@ -1,11 +1,11 @@
 mod add;
 mod get;
 
-use crate::entry::Entry;
 use crate::subcommands::dependencies::add::Add;
 use crate::subcommands::dependencies::get::Get;
 use clap::Args;
 use clap::Subcommand;
+use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
 pub(crate) struct Dependencies {

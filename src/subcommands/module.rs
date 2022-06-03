@@ -1,9 +1,10 @@
-use crate::entry::Entry;
 use crate::subcommands::add::Add;
 use crate::subcommands::dependencies::Dependencies;
 use crate::subcommands::remove::Remove;
 use clap::Args;
 use clap::Subcommand;
+use knapsac_lib::entry::Entry;
+use crate::subcommands::get::Get;
 
 #[derive(Args)]
 pub(crate) struct Module {
@@ -17,6 +18,7 @@ pub(crate) enum ModuleCommand {
     Add(Add),
     Dependencies(Dependencies),
     Remove(Remove),
+    Get(Get),
 }
 
 impl Module {
@@ -26,6 +28,7 @@ impl Module {
             ModuleCommand::Add(a) => a.handle_command(entry),
             ModuleCommand::Dependencies(d) => d.handle_command(entry),
             ModuleCommand::Remove(r) => r.handle_command(entry),
+            ModuleCommand::Get(g) => g.handle_command(&entry),
         }
     }
 }

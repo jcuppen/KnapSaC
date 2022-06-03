@@ -1,11 +1,11 @@
 mod standalone_module;
 mod stray_module;
 
-use crate::entry::Entry;
 use crate::subcommands::dependencies::add::standalone_module::StandaloneModule;
 use crate::subcommands::dependencies::add::stray_module::StrayModule;
 use clap::Args;
 use clap::Subcommand;
+use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
 pub(crate) struct Add {

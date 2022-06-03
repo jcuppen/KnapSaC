@@ -1,6 +1,5 @@
 extern crate core;
 
-mod entry;
 mod new_options;
 mod subcommands;
 

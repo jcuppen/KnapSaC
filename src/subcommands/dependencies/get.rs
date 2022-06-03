@@ -1,7 +1,7 @@
-use crate::entry::Entry;
 use clap::Args;
 use knapsac_lib::registry::Registry;
 use std::process::exit;
+use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
 pub(crate) struct Get {
@@ -11,22 +11,12 @@ pub(crate) struct Get {
 impl Get {
     pub(crate) fn handle_command(&self, depender: Entry) {
         let r = Registry::load();
-
-        let opt = match depender {
-            Entry::Executable(source_path) => {
-                r.get_dependency_for_executable(&source_path, &self.dependency_identifier)
-            }
-            Entry::StandaloneModule(module_identifier) => {
-                r.get_dependency_for_module(&module_identifier, &self.dependency_identifier)
-            }
-            Entry::PackageModule => {
-                panic!()
-            }
-        };
+        let opt = r.get_dependency(depender, &self.dependency_identifier);
 
         if let Some(d) = opt {
             println!("{}", d.output_path.display());
         } else {
+            println!("ERROR dep get");
             exit(1);
         }
     }

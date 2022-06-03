@@ -1,8 +1,8 @@
-use crate::entry::Entry;
 use clap::Args;
 use knapsac_lib::registry::Registry;
 use std::path::PathBuf;
 use std::process::exit;
+use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
 pub(crate) struct Add {
@@ -23,7 +23,7 @@ impl Add {
                     exit(1)
                 }
             }
-            Entry::PackageModule => {
+            Entry::PackageModule(_,_) => {
                 panic!()
             }
         }

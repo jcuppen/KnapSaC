@@ -1,10 +1,11 @@
-use crate::entry::Entry;
 use crate::subcommands::add::Add;
 use crate::subcommands::dependencies::Dependencies;
 use crate::subcommands::remove::Remove;
 use clap::Args;
 use clap::Subcommand;
 use std::path::PathBuf;
+use knapsac_lib::entry::Entry;
+use crate::subcommands::get::Get;
 
 #[derive(Args)]
 pub(crate) struct Executable {
@@ -18,6 +19,7 @@ pub(crate) enum ExecutableCommand {
     Add(Add),
     Dependencies(Dependencies),
     Remove(Remove),
+    Get(Get),
 }
 
 impl Executable {
@@ -27,6 +29,8 @@ impl Executable {
             ExecutableCommand::Add(a) => a.handle_command(entry),
             ExecutableCommand::Dependencies(d) => d.handle_command(entry),
             ExecutableCommand::Remove(r) => r.handle_command(entry),
+            ExecutableCommand::Get(g) => g.handle_command(&entry),
+
         }
     }
 }

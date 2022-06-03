@@ -1,7 +1,7 @@
-use crate::entry::Entry;
 use clap::Args;
 use knapsac_lib::registry::Registry;
 use knapsac_lib::Dependency;
+use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
 /// Adds a dependency to an executable
@@ -33,20 +33,6 @@ pub(crate) struct StandaloneModule {
 impl StandaloneModule {
     pub(crate) fn handle_command(&self, depender: Entry) {
         let mut r = Registry::load();
-        match depender {
-            Entry::Executable(source_path) => r.add_dependency_to_executable(
-                &source_path,
-                self.dependency_identifier.clone(),
-                Dependency::StandaloneModule,
-            ),
-            Entry::StandaloneModule(module_identifier) => r.add_dependency_to_module(
-                &module_identifier,
-                self.dependency_identifier.clone(),
-                Dependency::StandaloneModule,
-            ),
-            Entry::PackageModule => {
-                panic!()
-            }
-        }
+        r.add_dependency(depender, self.dependency_identifier.clone(), Dependency::StandaloneModule);
     }
 }
