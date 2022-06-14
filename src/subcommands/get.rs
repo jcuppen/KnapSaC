@@ -1,39 +1,22 @@
-
 use clap::Args;
 use knapsac_lib::registry::Registry;
+use std::path::PathBuf;
 use std::process::exit;
-use knapsac_lib::entry::Entry;
 
 #[derive(Args)]
-pub(crate) struct Get {}
+pub(crate) struct Get {
+    source_file: PathBuf,
+}
 
 impl Get {
-    pub(crate) fn handle_command(&self, entry: &Entry) {
+    pub(crate) fn handle_command(&self) {
         let r = Registry::load();
-        let path = match entry {
-            Entry::Executable(source_path) => {
-                r.get_executable(source_path).map(|_| source_path)
-            },
-            Entry::StandaloneModule(identifier) => {
-                r.get_module(identifier).map(|m| &m.output_path)
-            }
-            Entry::PackageModule(_,_) => {
-                panic!()
-            }
-        };
+        let module = r.get_module(&self.source_file);
 
-        if let Some(p) = path {
-            println!("{}", p.display());
+        if let Some(m) = module {
+            println!("{}", m.output_path.display());
         } else {
-            match entry {
-                Entry::Executable(s) => {
-                    println!("ERROR get {}", s.display());
-                },
-                Entry::StandaloneModule(i) => {
-                    println!("ERROR get {}", i);
-                },
-                Entry::PackageModule(_,_) => {panic!()}
-            }
+            println!("ERROR get module");
             exit(1);
         }
     }

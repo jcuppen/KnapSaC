@@ -3,15 +3,14 @@ use knapsac_lib::registry::Registry;
 use std::path::PathBuf;
 
 #[derive(Args)]
-pub(crate) struct Add {
+pub(crate) struct MarkAsModule {
     source_file: PathBuf,
-    output_directory: PathBuf,
+    identifier: String,
 }
 
-impl Add {
+impl MarkAsModule {
     pub(crate) fn handle_command(&self) {
         let mut r = Registry::load();
-        println!("HELLO");
-        r.add_item(self.source_file.clone(), self.output_directory.clone());
+        r.mark_as_module(&self.source_file, self.identifier.clone());
     }
 }
