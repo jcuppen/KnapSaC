@@ -11,7 +11,6 @@ pub(crate) struct Add {
 impl Add {
     pub(crate) fn handle_command(&self) {
         let mut r = Registry::load();
-        println!("HELLO");
         r.add_item(self.source_file.clone(), self.output_directory.clone());
     }
 }

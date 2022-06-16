@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "3.1.18", features = ["derive", "env"] }
 url = "2.2.2"
-knapsac_lib = { path = "/Users/job/GitRepositories/KnapSaC-lib", version = "0.1" }
-#knapsac_lib = { path = "/home/job/GitRepositories/KnapSaC-lib", version = "0.1" }
+#knapsac_lib = { path = "/Users/job/GitRepositories/KnapSaC-lib", version = "0.1" }
+knapsac_lib = { path = "/home/job/GitRepositories/KnapSaC-lib", version = "0.1" }
 dirs = "4.0"
 scan_fmt = "0.2.6"

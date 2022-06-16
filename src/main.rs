@@ -1,5 +1,5 @@
-#[macro_use]
-extern crate scan_fmt;
+// #[macro_use]
+// extern crate scan_fmt;
 
 mod new_options;
 mod subcommands;
@@ -10,8 +10,6 @@ use std::process::exit;
 
 fn main() {
     let cli: Cli = Cli::parse();
-
-    println!("IIII");
 
     match cli.command {
         Command::Add(a) => a.handle_command(),
