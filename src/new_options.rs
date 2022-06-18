@@ -5,6 +5,7 @@ use crate::subcommands::has::Has;
 use crate::subcommands::mark_as_module::MarkAsModule;
 use crate::subcommands::remove::Remove;
 use crate::subcommands::search::Search;
+use crate::subcommands::package::Package;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -22,4 +23,6 @@ pub(crate) enum Command {
     MarkAsModule(MarkAsModule),
     Remove(Remove),
     Dependencies(Dependencies),
+
+    Package(Package),
 }

@@ -5,3 +5,4 @@ pub(crate) mod has;
 pub(crate) mod mark_as_module;
 pub(crate) mod remove;
 pub(crate) mod search;
+pub(crate) mod package;

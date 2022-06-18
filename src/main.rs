@@ -1,6 +1,3 @@
-// #[macro_use]
-// extern crate scan_fmt;
-
 mod new_options;
 mod subcommands;
 
@@ -19,6 +16,7 @@ fn main() {
         Command::MarkAsModule(m) => m.handle_command(),
         Command::Remove(r) => r.handle_command(),
         Command::Dependencies(d) => d.handle_command(),
+        Command::Package(p) => p.handle_command(),
     }
     exit(0);
 }
