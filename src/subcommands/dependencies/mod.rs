@@ -26,7 +26,7 @@ pub(crate) enum DependenciesCommand {
 impl Dependencies {
     pub(crate) fn handle_command(&self) {
         match &self.command {
-            DependenciesCommand::Add(a) => a.handle_command(self.source_file.clone()),
+            DependenciesCommand::Add(a) => a.handle_command(&self.source_file),
             DependenciesCommand::Has(h) => h.handle_command(&self.source_file),
             DependenciesCommand::Get(g) => g.handle_command(&self.source_file),
         }

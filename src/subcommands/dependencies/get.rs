@@ -24,7 +24,7 @@ impl Get {
                 Dependency::Standalone(_) => {
                     self.print_path(&r.dep_to_module(d).unwrap().output_path)
                 }
-                Dependency::Package => panic!(),
+                Dependency::Package(_, _) => panic!(),
             }
         } else {
             println!("ERROR dep get");

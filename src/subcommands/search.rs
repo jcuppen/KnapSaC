@@ -46,29 +46,23 @@ impl Search {
         }
 
         match self.choice {
-            None => {
-                match candidates[..] {
-                    [] => panic!(),
-                    [i] => self.print_path(i),
-                    _ => {
-                        Search::print_paths(candidates);
-                    }
+            None => match candidates[..] {
+                [] => panic!(),
+                [i] => self.print_path(i),
+                _ => {
+                    Search::print_paths(candidates);
                 }
-            }
-            Some(c) => {
-                match candidates[..] {
-                    [] => panic!(),
-                    [i] => self.print_path(i),
-                    _ => {
-                        if c == 0 && c-1 > candidates.len() {
-                            eprintln!("Invalid choice");
-                        }
-                        self.print_path(candidates[c-1]);
+            },
+            Some(c) => match candidates[..] {
+                [] => panic!(),
+                [i] => self.print_path(i),
+                _ => {
+                    if c == 0 && c - 1 > candidates.len() {
+                        eprintln!("Invalid choice");
                     }
+                    self.print_path(candidates[c - 1]);
                 }
-            }
+            },
         }
-
-
     }
 }
