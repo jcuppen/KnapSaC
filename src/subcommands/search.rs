@@ -1,9 +1,7 @@
-// use std::io::stdin;
 use clap::ArgEnum;
 use clap::Args;
 use knapsac_lib::module::Module;
 use knapsac_lib::registry::Registry;
-// use scan_fmt::scanln_fmt;
 use std::path::PathBuf;
 use std::process::exit;
 
@@ -22,9 +20,11 @@ pub(crate) struct Search {
 }
 
 impl Search {
-    fn print_paths(candidates: Vec<(&PathBuf, &Module)>) {
+    fn print_paths(&self, candidates: Vec<(&PathBuf, &Module)>) {
+        println!("Which {} do you want to use?", self.identifier);
+        println!("\t[0]: Try to use fallback mechanism");
         for (i, (_, v)) in candidates.iter().enumerate() {
-            println!("[{}]: {}", i + 1, v.output_path.display());
+            println!("\t[{}]: {}", i + 1, v.output_path.display());
         }
     }
 
@@ -38,7 +38,8 @@ impl Search {
 
     pub(crate) fn handle_command(&self) {
         let r = Registry::load();
-        let candidates = r.get_modules(&self.identifier);
+        let mut candidates = r.get_modules(&self.identifier);
+        candidates.sort_by(|(ap, _), (bp, _)| ap.partial_cmp(bp).unwrap());
 
         if candidates.is_empty() {
             eprintln!("No modules for identifier '{}'", self.identifier);
@@ -50,7 +51,7 @@ impl Search {
                 [] => panic!(),
                 [i] => self.print_path(i),
                 _ => {
-                    Search::print_paths(candidates);
+                    self.print_paths(candidates);
                 }
             },
             Some(c) => match candidates[..] {
