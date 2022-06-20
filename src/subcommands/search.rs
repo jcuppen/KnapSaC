@@ -25,8 +25,8 @@ impl Search {
         for (i, (_, v)) in candidates.iter().enumerate() {
             println!("[{}]: {}", i + 1, v.output_path.display());
         }
-        print!(
-            "Which {} do you want to use? [0..{}] ",
+        println!(
+            "Which {} do you want to use? [0..{}]",
             self.identifier,
             candidates.len()
         );
@@ -57,8 +57,6 @@ impl Search {
         all.append(&mut candidates);
         all.append(&mut p_candidates);
 
-        let candidates_len = candidates.len();
-        let total = candidates_len + p_candidates.len();
 
         match self.choice {
             None => match all[..] {
@@ -68,7 +66,7 @@ impl Search {
                     self.print_paths(all);
                 }
             },
-            Some(c) if (1..total).contains(&c) => {
+            Some(c) if (1..all.len() + 1).contains(&c) => {
                 self.print_path(all[c - 1]);
             }
             // Some(c) if ((candidates_len + 1)..(total + 1)).contains(&c) => {
