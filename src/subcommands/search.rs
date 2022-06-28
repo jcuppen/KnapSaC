@@ -16,8 +16,8 @@ pub(crate) struct Search {
     #[clap(arg_enum)]
     path_type: PathType,
     identifier: String,
-    #[clap(short)]
-    link_paths: Vec<PathBuf>,
+    // #[clap(short)]
+    // link_paths: Vec<PathBuf>,
     choice: Option<usize>,
 }
 
@@ -54,30 +54,30 @@ impl Search {
         all.append(&mut candidates);
         all.append(&mut p_candidates);
 
-        let canonical_link_paths: Vec<PathBuf> = self
-            .link_paths
-            .iter_mut()
-            .map(|p| p.canonicalize().unwrap())
-            .collect();
+        // let canonical_link_paths: Vec<PathBuf> = self
+        //     .link_paths
+        //     .iter_mut()
+        //     .map(|p| p.canonicalize().unwrap())
+        //     .collect();
 
-        let total_matches = all
-            .iter()
-            .filter(|(_, m)| canonical_link_paths.contains(&m.output_path))
-            .count();
+        // let total_matches = all
+        //     .iter()
+        //     .filter(|(_, m)| canonical_link_paths.contains(&m.output_path))
+        //     .count();
 
-        match total_matches {
-            0 => {}
-            1 => {
-                all.retain(|(_, m)| self.link_paths.contains(&m.output_path));
-            }
-            _ => {
-                eprintln!("Multiple modules share output path with paths that will be passed to the linker.");
-                eprintln!(
-                    "This makes it very unpredictable to guarantee intended usage of modules."
-                );
-                exit(1);
-            }
-        }
+        // match total_matches {
+        //     0 => {}
+        //     1 => {
+        //         all.retain(|(_, m)| self.link_paths.contains(&m.output_path));
+        //     }
+        //     _ => {
+        //         eprintln!("Multiple modules share output path with paths that will be passed to the linker.");
+        //         eprintln!(
+        //             "This makes it very unpredictable to guarantee intended usage of modules."
+        //         );
+        //         exit(1);
+        //     }
+        // }
 
         if all.is_empty() {
             eprintln!("No modules for identifier '{}'", self.identifier);
