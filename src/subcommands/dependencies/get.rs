@@ -25,7 +25,7 @@ impl Get {
                     self.print_path(&r.dep_to_module(d).unwrap().output_path)
                 }
                 Dependency::Package(_, _) => {
-                    self.print_path(&r.dep_to_module(d).unwrap().output_path);
+                    self.print_path(&r.dep_to_module(d).unwrap().output_path)
                 }
             }
         } else {

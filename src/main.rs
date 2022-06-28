@@ -1,3 +1,5 @@
+extern crate core;
+
 mod new_options;
 mod subcommands;
 
@@ -12,7 +14,7 @@ fn main() {
         Command::Add(a) => a.handle_command(),
         Command::Has(h) => h.handle_command(),
         Command::Get(g) => g.handle_command(),
-        Command::Search(s) => s.handle_command(),
+        Command::Search(mut s) => s.handle_command(),
         Command::MarkAsModule(m) => m.handle_command(),
         Command::Remove(r) => r.handle_command(),
         Command::Dependencies(d) => d.handle_command(),

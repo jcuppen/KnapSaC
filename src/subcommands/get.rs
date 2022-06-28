@@ -11,7 +11,7 @@ pub(crate) struct Get {
 impl Get {
     pub(crate) fn handle_command(&self) {
         let r = Registry::load();
-        let module = r.get_module(&self.source_file);
+        let module = r.get_module(&self.source_file.canonicalize().unwrap());
 
         if let Some(m) = module {
             println!("{}", m.output_path.display());

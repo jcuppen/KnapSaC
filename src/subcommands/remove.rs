@@ -10,6 +10,6 @@ pub(crate) struct Remove {
 impl Remove {
     pub(crate) fn handle_command(&self) {
         let mut r = Registry::load();
-        r.remove_item(&self.source_file);
+        r.remove_item(&self.source_file.canonicalize().unwrap());
     }
 }

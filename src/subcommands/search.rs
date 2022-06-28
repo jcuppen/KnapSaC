@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::process::exit;
 
 #[derive(Clone, ArgEnum)]
-pub(crate) enum PathType {
+enum PathType {
     Source,
     Output,
 }
@@ -16,6 +16,8 @@ pub(crate) struct Search {
     #[clap(arg_enum)]
     path_type: PathType,
     identifier: String,
+    #[clap(short)]
+    link_paths: Vec<PathBuf>,
     choice: Option<usize>,
 }
 
@@ -40,7 +42,7 @@ impl Search {
         println!("{}", path.display());
     }
 
-    pub(crate) fn handle_command(&self) {
+    pub(crate) fn handle_command(&mut self) {
         let r = Registry::load();
         let mut candidates = r.search_modules_by_id(&self.identifier);
         let mut p_candidates = r.search_package_modules(&self.identifier);
@@ -48,30 +50,49 @@ impl Search {
         candidates.sort_by(|(ap, _), (bp, _)| ap.partial_cmp(bp).unwrap());
         p_candidates.sort_by(|(ap, _), (bp, _)| ap.partial_cmp(bp).unwrap());
 
-        if candidates.is_empty() && p_candidates.is_empty() {
-            eprintln!("No modules for identifier '{}'", self.identifier);
-            exit(1);
-        }
-
         let mut all = vec![];
         all.append(&mut candidates);
         all.append(&mut p_candidates);
 
+        let canonical_link_paths: Vec<PathBuf> = self
+            .link_paths
+            .iter_mut()
+            .map(|p| p.canonicalize().unwrap())
+            .collect();
+
+        let total_matches = all
+            .iter()
+            .filter(|(_, m)| canonical_link_paths.contains(&m.output_path))
+            .count();
+
+        match total_matches {
+            0 => {}
+            1 => {
+                all.retain(|(_, m)| self.link_paths.contains(&m.output_path));
+            }
+            _ => {
+                eprintln!("Multiple modules share output path with paths that will be passed to the linker.");
+                eprintln!(
+                    "This makes it very unpredictable to guarantee intended usage of modules."
+                );
+                exit(1);
+            }
+        }
+
+        if all.is_empty() {
+            eprintln!("No modules for identifier '{}'", self.identifier);
+            exit(1);
+        }
 
         match self.choice {
             None => match all[..] {
                 [] => panic!(),
                 [i] => self.print_path(i),
-                _ => {
-                    self.print_paths(all);
-                }
+                _ => self.print_paths(all),
             },
             Some(c) if (1..all.len() + 1).contains(&c) => {
                 self.print_path(all[c - 1]);
             }
-            // Some(c) if ((candidates_len + 1)..(total + 1)).contains(&c) => {
-            //     self.print_path(all[c - (1 + candidates_len)])
-            // }
             Some(_) => panic!("Invalid choice"),
         }
     }

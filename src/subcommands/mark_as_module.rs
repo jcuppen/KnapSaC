@@ -11,6 +11,9 @@ pub(crate) struct MarkAsModule {
 impl MarkAsModule {
     pub(crate) fn handle_command(&self) {
         let mut r = Registry::load();
-        r.mark_as_module(&self.source_file, self.identifier.clone());
+        r.mark_as_module(
+            &self.source_file.canonicalize().unwrap(),
+            self.identifier.clone(),
+        );
     }
 }

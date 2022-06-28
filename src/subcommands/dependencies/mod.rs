@@ -25,10 +25,11 @@ pub(crate) enum DependenciesCommand {
 
 impl Dependencies {
     pub(crate) fn handle_command(&self) {
+        let depender = self.source_file.canonicalize().unwrap();
         match &self.command {
-            DependenciesCommand::Add(a) => a.handle_command(&self.source_file),
-            DependenciesCommand::Has(h) => h.handle_command(&self.source_file),
-            DependenciesCommand::Get(g) => g.handle_command(&self.source_file),
+            DependenciesCommand::Add(a) => a.handle_command(&depender),
+            DependenciesCommand::Has(h) => h.handle_command(&depender),
+            DependenciesCommand::Get(g) => g.handle_command(&depender),
         }
     }
 }
